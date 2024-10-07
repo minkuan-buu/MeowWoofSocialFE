@@ -27,6 +27,8 @@ import { IoSend } from "react-icons/io5";
 import { IoMdImages } from "react-icons/io";
 import { FaCircleXmark } from "react-icons/fa6";
 import { CREATECOMMENT } from "@/api/Comment";
+import { useFormik } from "formik";
+import { CommentForm } from "@/components/comment";
 
 interface newFeedPost{
   id: string;
@@ -86,7 +88,6 @@ export default function IndexPage() {
   const [showEmotions, setShowEmotions] = useState<{ [key: string]: boolean }>({}); // Trạng thái cho từng bài viết
   const hoverTimeoutRefs = useRef<{ [key: string]: number | null }>({}); // Timeout cho từng bài viết
   const closeTimeoutRefs = useRef<{ [key: string]: number | null }>({}); // Timeout đóng cho từng bài viết
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   
   const handleMouseEnterLike = (postId: string) => {
     // Khi chuột hover vào nút "Thích"
@@ -132,52 +133,52 @@ export default function IndexPage() {
   };
 
   // Tạo một mảng refs để tham chiếu đến nhiều Textareas
-  const textareaRefs = useRef<(HTMLTextAreaElement | null)[]>([]);
-
+  // const textareaRefs = useRef<(HTMLTextAreaElement | null)[]>([]);
+  const [textAreaComment, setTextAreaComment] = useState<{[key: string]: string | null}>({});
   // Hàm để lưu ref của mỗi Textarea
-  const setTextareaRef = (element: HTMLTextAreaElement | null, index: number) => {
-    textareaRefs.current[index] = element;
-  };
+  // const setTextareaRef = (element: HTMLTextAreaElement | null, index: number) => {
+  //   textareaRefs.current[index] = element;
+  // };
 
-  const [selectedFiles, setSelectedFiles] = useState<{ [key: string]: File | null }>({});
-  const [imagePreviews, setImagePreviews] = useState<{ [key: string]: string | null }>({});
+  // const [selectedFiles, setSelectedFiles] = useState<{ [key: string]: File | null }>({});
+  // const [imagePreviews, setImagePreviews] = useState<{ [key: string]: string | null }>({});
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>, postId: string) => {
-    const uploadFiles = Array.from(event.target.files as FileList);
+  // const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>, postId: string) => {
+  //   const uploadFiles = Array.from(event.target.files as FileList);
 
-    if (uploadFiles.length > 0) {
-      const file = uploadFiles[0]; // Chỉ lấy tệp đầu tiên
+  //   if (uploadFiles.length > 0) {
+  //     const file = uploadFiles[0]; // Chỉ lấy tệp đầu tiên
 
-      // Đọc tệp để xem trước hình ảnh
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        if (e.target?.result) {
-            setImagePreviews(prev => ({
-                ...prev,
-                [postId]: e.target?.result as string // Lưu hình ảnh xem trước theo postId
-            }));
-        }
-      };
-      reader.readAsDataURL(file);
-      console.log(postId);
-      console.log(selectedFiles);
-      console.log(imagePreviews);
-      // Lưu file đã chọn theo postId
-      setSelectedFiles(prev => ({
-          ...prev,
-          [postId]: file
-      }));
-    }
-  };
+  //     // Đọc tệp để xem trước hình ảnh
+  //     const reader = new FileReader();
+  //     reader.onload = (e) => {
+  //       if (e.target?.result) {
+  //           setImagePreviews(prev => ({
+  //               ...prev,
+  //               [postId]: e.target?.result as string // Lưu hình ảnh xem trước theo postId
+  //           }));
+  //       }
+  //     };
+  //     reader.readAsDataURL(file);
+  //     console.log(postId);
+  //     console.log(selectedFiles);
+  //     console.log(imagePreviews);
+  //     // Lưu file đã chọn theo postId
+  //     setSelectedFiles(prev => ({
+  //         ...prev,
+  //         [postId]: file
+  //     }));
+  //   }
+  // };
 
 
   // Hàm xử lý khi bấm vào nút "Bình luận"
-  const handleCommentClick = (index: number) => {
-    const textarea = textareaRefs.current[index];
-    if (textarea) {
-      textarea.focus(); // Focus vào Textarea tương ứng nếu không phải là null
-    }
-  };
+  // const handleCommentClick = (index: number) => {
+  //   const textarea = textareaRefs.current[index];
+  //   if (textarea) {
+  //     textarea.focus(); // Focus vào Textarea tương ứng nếu không phải là null
+  //   }
+  // };
 
 
   // Danh sách các emoji phản ứng cố định
@@ -227,7 +228,6 @@ export default function IndexPage() {
   const [posts, setPosts] = useState<Post[]>([]); // Mảng chứa bài viết
   const [isLoading, setIsLoading] = useState<boolean>(false); // Trạng thái đang tải
   const pageSize = 3; // Số lượng bài viết mỗi lần fetch
-  const [isReady, setIsReady] = useState<boolean>(false);
   const [onLoading, setOnLoading] = useState<boolean>(false);
   const lastPostIdRef = useRef<string | null>(null); // Sử dụng useRef để lưu lastPostId
   const hasMoreRef = useRef<boolean>(true); // Sử dụng useRef để lưu trạng thái hasMore
@@ -322,80 +322,76 @@ export default function IndexPage() {
       }
     }
   };
+  
+  // async function callAPICreateComment(CommentReq: FormData, token: string, postId: string) {
+  //   try {
+  //     const response = await CREATECOMMENT({
+  //       CommentReq: CommentReq,
+  //       token: token,
+  //     });
 
-  const handleTest = async (id: string, index: number) => {
-    const textareaValue = textareaRefs.current[index]?.value; // Lấy giá trị từ textarea
+  //     if (response.isSuccess && 'data' in response.res!) {
+  //       setOnLoading(false);
+
+  //       // Sau khi đăng bình luận thành công, xóa nội dung của textarea
+  //       // Xóa nội dung `textarea` sau khi thành công
+  //       removeImage(postId); // Xóa hình ảnh tương ứng
+
+  //       return response.res.data;
+  //     } else if ("message" in response.res!) {
+  //       const errorResponse = response.res as { message: string };
+  //       setOnLoading(false);
+
+  //       throw new Error(errorResponse.message);
+  //     } else {
+  //       setOnLoading(false);
+  //       throw new Error("Không thể đăng bình luận!");
+  //     }
+  //   } catch (error: any) {
+  //     setOnLoading(false);
+  //     throw new Error(error.message || "Có lỗi xảy ra");
+  //   }
+  // }
+
+  // const handleTest = async (id: string, index: number) => {
+  //   const textareaValue = textareaRefs.current[index]?.value; // Lấy giá trị từ textarea
   
-    const NewComment = new FormData();
-    NewComment.append("PostId", id); // Thêm PostId vào FormData
+  //   const NewComment = new FormData();
+  //   NewComment.append("PostId", id); // Thêm PostId vào FormData
   
-    // Chỉ thêm nội dung nếu không null hoặc undefined
-    if (textareaValue) {
-      NewComment.append("Content", textareaValue);
-    }
+  //   // Chỉ thêm nội dung nếu không null hoặc undefined
+  //   if (textareaValue) {
+  //     NewComment.append("Content", textareaValue);
+  //   }
   
-    // Chỉ thêm file đính kèm nếu nó tồn tại
-    if (selectedFiles[id]) {
-      NewComment.append("Attachment", selectedFiles[id] as Blob); // Đảm bảo kiểu của selectedFiles[id] là Blob
-    }
+  //   // Chỉ thêm file đính kèm nếu nó tồn tại
+  //   if (selectedFiles[id]) {
+  //     NewComment.append("Attachment", selectedFiles[id] as Blob); // Đảm bảo kiểu của selectedFiles[id] là Blob
+  //   }
   
-    // Sử dụng toast.promise để xử lý phản hồi từ API
-    toast.promise(callAPICreateComment(NewComment, localStorage.token), {
-      loading: "Đang đăng bình luận...",
-      success: <b>Đăng bình luận thành công!</b>,
-      error: (err) => <b>{err.message || 'Có lỗi xảy ra khi đăng bình luận.'}</b>,
-    });
+  //   // Sử dụng toast.promise để xử lý phản hồi từ API
+  //   toast.promise(callAPICreateComment(NewComment, localStorage.token), {
+  //     loading: "Đang đăng bình luận...",
+  //     success: <b>Đăng bình luận thành công!</b>,
+  //     error: (err) => <b>{err.message || 'Có lỗi xảy ra khi đăng bình luận.'}</b>,
+  //   });
   
-    // Hàm để gọi API tạo bình luận
-    async function callAPICreateComment(CommentReq: FormData, token: string) {
-      try {
-        const response = await CREATECOMMENT({
-          CommentReq: CommentReq,
-          token: token,
-        });
-  
-        // Kiểm tra xem phản hồi có thành công hay không
-        if (response.isSuccess && 'data' in response.res!) {
-          const successResponse = response.res.data;
-          setOnLoading(false); // Dừng trạng thái loading
-  
-          // Xóa nội dung của textarea và hình ảnh tương ứng
-          if (textareaRefs.current[index]) {
-            textareaRefs.current[index]!.value = ""; // Đặt lại giá trị textarea
-          }
-          removeImage(id, index); // Xóa hình ảnh tương ứng
-  
-          return successResponse; // Trả về phản hồi thành công
-        } else if ("message" in response.res!) {
-          const errorResponse = response.res as { message: string };
-          setOnLoading(false); // Dừng trạng thái loading
-          if (
-            errorResponse.message ===
-            "You are banned from posting due to violate of terms!"
-          ) {
-            errorResponse.message = "Bạn đã bị cấm đăng bài do vi phạm tiêu chuẩn cộng đồng";
-          }
-          throw new Error(errorResponse.message); // Ném lỗi để xử lý
-        } else {
-          setOnLoading(false); // Dừng trạng thái loading
-          throw new Error("Không thể đăng đăng bình luận!"); // Lỗi chung
-        }
-      } catch (error: any) {
-        setOnLoading(false); // Dừng trạng thái loading
-        throw new Error(error.message || "Có lỗi xảy ra"); // Ném lỗi nếu có
-      }
-    }
-  };
+    
+  // };
   
 
-  const handleChangeContent = (content: string) =>{
-    if (content.length > 0){
-        setIsReady(true);
-    } else {
-        setIsReady(false);
-    }
-    //formik.setFieldValue("Content", content);
-  }
+  // const handleChangeContent = (value: string, index: number) => {
+  //   if (textareaRefs.current[index]) {
+  //     textareaRefs.current[index].value = value; // Cập nhật trực tiếp giá trị textarea
+  //   }
+  
+  //   // Kiểm tra và cập nhật trạng thái sẵn sàng
+  //   if (value.trim().length > 0) {
+  //     setIsReady(true);
+  //   } else {
+  //     setIsReady(false);
+  //   }
+  // };
 
   useEffect(() => {
     // Fetch lần đầu khi component mount
@@ -415,25 +411,20 @@ export default function IndexPage() {
     onOpenShare();
   }
 
-  const removeImage = (postId: string, index: number) => {
-    // Xóa file đã chọn và hình ảnh xem trước
-    setImagePreviews((prevPreviews) => {
-      const updatedPreviews = { ...prevPreviews };
-      delete updatedPreviews[postId];  // Xóa hình ảnh của postId tương ứng
-      return updatedPreviews;  // Cập nhật lại trạng thái với ảnh đã bị xóa
-    });
+  // const removeImage = (postId: string) => {
+  //   // Xóa file đã chọn và hình ảnh xem trước
+  //   setImagePreviews((prevPreviews) => {
+  //     const updatedPreviews = { ...prevPreviews };
+  //     delete updatedPreviews[postId];  // Xóa hình ảnh của postId tương ứng
+  //     return updatedPreviews;  // Cập nhật lại trạng thái với ảnh đã bị xóa
+  //   });
   
-    setSelectedFiles((prevFiles) => {
-      const updatedFiles = { ...prevFiles };
-      delete updatedFiles[postId];  // Xóa file đã chọn của postId tương ứng
-      return updatedFiles;  // Cập nhật lại trạng thái file đã chọn
-    });
-
-    // Đặt lại giá trị của input về null
-    if (inputRefs.current[index]) {
-      inputRefs.current[index].value = '';  // Reset lại giá trị của input
-    }
-  };
+  //   setSelectedFiles((prevFiles) => {
+  //     const updatedFiles = { ...prevFiles };
+  //     delete updatedFiles[postId];  // Xóa file đã chọn của postId tương ứng
+  //     return updatedFiles;  // Cập nhật lại trạng thái file đã chọn
+  //   });
+  // };
 
   return (
     <>
@@ -794,7 +785,7 @@ export default function IndexPage() {
                             <hr className="vertical-hr bg-gray-500" />
                             <div
                               className="flex flex-row items-center py-1 px-12 hover:bg-[#e5dfca] hover:text-[#102530] hover:rounded-md transition-all"
-                              onMouseDownCapture={() => handleCommentClick(index)}
+                              // onMouseDownCapture={() => handleCommentClick(index)}
                             >
                               <FaRegCommentAlt />
                               <span className="ml-2 select-none">Bình luận</span>
@@ -817,19 +808,19 @@ export default function IndexPage() {
                               src={localStorage.getItem("avatar") || undefined}
                             />
                             <div className="flex flex-col w-11/12">
-                            <Textarea
-                                ref={(element) => setTextareaRef(element, index)}
-                                className="ml-2 flex-grow"
+                              {/* <Textarea
+                                name="content"
+                                value={formik.values.content}
+                                onChange={formik.handleChange}
                                 placeholder="Nhập bình luận"
                                 onKeyDown={(e) => {
                                   if (e.key === "Enter" && !e.shiftKey) {
                                     e.preventDefault();
-                                    if (isReady || selectedFiles[post.id] != null) {
-                                      handleTest(post.id, index); // Truyền cả postId và index
+                                    if (isReady || selectedFiles[post.id] != null || !formik.isSubmitting) {
+                                      formik.handleSubmit(); // Truyền cả postId và index
                                     }
                                   }
                                 }}
-                                onChange={(e) => handleChangeContent(e.target.value)}
                                 minRows={1}
                                 maxRows={5}
                                 style={{ resize: "none", whiteSpace: "pre-wrap" }}
@@ -846,35 +837,17 @@ export default function IndexPage() {
                                       <IoMdImages style={{ fontSize: "20px" }} />
                                     </button>
                                     <button
-                                      disabled={!selectedFiles[post.id] && !isReady} // Disable khi không có file hoặc hệ thống chưa sẵn sàng
-                                      onClick={() => handleTest(post.id, index)} // Gọi hàm handleTest khi button được nhấn
-                                      className={`flex items-center ${!selectedFiles[post.id]&& !isReady ? 'cursor-not-allowed opacity-50' : ''}`} // Thêm class cho style disabled
+                                      disabled={!selectedFiles[post.id] && !isReady}
+                                      onClick={formik.handleSubmit}
+                                      className={`flex items-center ${!selectedFiles[post.id] && !isReady ? 'cursor-not-allowed opacity-50' : ''}`}
                                     >
                                       <IoSend />
                                     </button>
                                   </div>
                                 )}
-                              />
+                              /> */}
                               {/* Hiển thị hình preview dưới Textarea chỉ cho post hiện tại */}
-                              {imagePreviews[post.id] && (
-                                <div className="relative mt-2 ml-2">
-                                  <span className="text-sm">Xem trước hình đính kèm bình luận của bạn</span>
-                                  {/* Nút xóa hình ảnh xem trước */}
-                                  <button
-                                    className="absolute top-6 right-0 text-xl text-gray-600 rounded-full p-1 hover:text-red-600"
-                                    onClick={() => removeImage(post.id, index)}
-                                  >
-                                    <FaCircleXmark />
-                                  </button>
-
-                                  {/* Hình xem trước */}
-                                  <img 
-                                    src={imagePreviews[post.id]!}  // Lấy hình ảnh theo postId
-                                    alt="Hình xem trước" 
-                                    className="max-w-full h-auto rounded"
-                                  />
-                                </div>
-                              )}
+                              <CommentForm postId={post.id} />
                             </div>
                           </div>
                         </div>
