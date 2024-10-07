@@ -1,0 +1,35 @@
+.avatar-size {
+    width: 80px; /* Điều chỉnh kích thước của Avatar */
+    height: 80px; /* Giữ cho Avatar hình vuông */
+}
+
+.vertical-hr {
+    width: 1px; /* Độ rộng của đường kẻ */
+    height: 25px; /* Chiều cao của đường kẻ */
+    background-color: #000; /* Màu sắc của đường kẻ */
+    margin: 0 15px; /* Khoảng cách giữa Avatar và status-bar */
+    border: none; /* Bỏ viền mặc định của hr */
+}
+
+.status-bar {
+    display: flex;
+    align-items: center;
+    background-color: #e5dfca;
+    padding: 5px 15px;
+    border-radius: 20px;
+    max-width: 600px;
+    margin-left: 20px; /* Tạo khoảng cách giữa Avatar và status-bar */
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+    flex-grow: 1; /* Đảm bảo status-bar chiếm phần còn lại */
+}
+
+.status-icon {
+    font-size: 24px;
+    margin-right: 10px;
+}
+
+.status-text {
+    font-size: 16px;
+    color: #4b4f56;
+    flex: 1;
+}

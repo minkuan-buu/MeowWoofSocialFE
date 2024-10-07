@@ -1,0 +1,69 @@
+.file-btn {
+    width: 250px;
+    height: 150px;
+    font-size: 18px;
+    font-weight: 500;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    color: rgb(99, 122, 138);
+    background-color: #fff;
+    border: 1.5px dashed rgb(99, 122, 138);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+  
+.file-btn:hover {
+    color: rgb(99, 122, 138);
+    background-color: #fff;
+}
+  
+.file-btn span {
+    width: 50px;
+    height: 50px;
+    font-size: 30px;
+    color: rgb(99, 122, 138);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 25px;
+    background-color: #edf2f7;
+}
+  
+.selected-file {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #edf2f7;
+    border: 1px solid #edf2f7;
+    border-radius: 20px;
+    margin-top: 20px;
+}
+  
+.selected-file p {
+    font-size: 13px;
+    font-weight: 500;
+    margin-left: 15px;
+}
+  
+.selected-file button {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgb(99, 122, 138);
+    background-color: transparent;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+  
+.selected-file button:hover {
+    color: #fff;
+    background-color: rgb(99, 122, 138);
+}
