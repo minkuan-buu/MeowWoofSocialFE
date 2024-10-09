@@ -1,19 +1,20 @@
-import { CreateCommentRes } from "@/interface/comment";
+
+import { CreateFeelingReq, CreateFeelingRes } from "@/interface/feeling";
 import { API_URL } from "./Endpoint";
 
-export const CREATECOMMENT: ApiCall<
-  { CommentReq: FormData, token: string },
+export const CREATEFEELING: ApiCall<
+  { FeelingReq: CreateFeelingReq, token: string },
   {
-    data: CreateCommentRes;
+    data: CreateFeelingRes;
   }
 > = async (body) => {
   try {
-    const res = await fetch(API_URL + `react/create-comment`, {
+    const res = await fetch(API_URL + `react/create-reaction`, {
       method: "POST",
       headers: {
         "Authorization": "Bearer " + body.token
       },
-      body: body.CommentReq
+      body: JSON.stringify(body.FeelingReq),
     });
 
     if (res.ok) {

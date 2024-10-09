@@ -1,12 +1,12 @@
-export interface CreateComment {
+export interface CreateCommentRes {
     id: string;
     content: string;
     attachment?: string;
     author: {
       id: string;
       name: string;
-      avatar: string;
+      avatar?: string;
     };
     createdAt: Date;
-    updatedAt: Date;
+    updatedAt?: Date;
 }

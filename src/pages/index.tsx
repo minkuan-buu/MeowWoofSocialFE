@@ -8,7 +8,7 @@ import { ourServices, siteConfig } from "@/config/site";
 import { title, subtitle } from "@/components/primitives";
 import { GithubIcon } from "@/components/icons";
 import DefaultLayout from "@/layouts/default";
-import { useEffect, useRef, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import '../styles/status-bar.css';
 import { TbDotsVertical } from "react-icons/tb";
 import { AiOutlineLike } from "react-icons/ai";
@@ -20,7 +20,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { FiXCircle } from "react-icons/fi";
 import EmojiPicker, { EmojiClickData, EmojiStyle } from 'emoji-picker-react';
 import { CustomEmoji } from "emoji-picker-react/dist/config/customEmojiConfig";
-import { CreatePost } from "@/components/post";
+import { CreatePost, PostDetailPopup } from "@/components/post";
 import { Post } from "@/interface/post";
 import { ShareModal } from "@/components/share";
 import { IoSend } from "react-icons/io5";
@@ -29,6 +29,10 @@ import { FaCircleXmark } from "react-icons/fa6";
 import { CREATECOMMENT } from "@/api/Comment";
 import { useFormik } from "formik";
 import { CommentForm } from "@/components/comment";
+import { HiDotsHorizontal } from "react-icons/hi";
+import { LikeButton } from "@/components/likeButton";
+import { calculateTimeDifference } from "@/components/func/postFunc";
+import { FeelingGUI } from "@/interface/feeling";
 
 interface newFeedPost{
   id: string;
@@ -72,6 +76,200 @@ interface newFeedPost{
   updatedAt: Date
 }[];
 
+const PostCard: React.FC<{ post: Post, emojiPost: {[key: string]: FeelingGUI | null}, setEmojiPost: Dispatch<SetStateAction<{
+  [key: string]: FeelingGUI | null;
+}>> }> = ({ post, emojiPost, setEmojiPost }) => {
+  const { isOpen: isOpenPostPopup, onOpen: onOpenPostPopup, onOpenChange: onOpenChangePostPopup } = useDisclosure();
+  const {
+    isOpen: isOpenShare,
+    onOpen: onOpenShare,
+    onOpenChange: onOpenChangeShare,
+  } = useDisclosure();
+  const [sharePostId, setSharePostId] = useState<string>("");
+  const Share = (postId: string) => {
+    setSharePostId(postId);
+    onOpenShare();
+  }
+  return (
+    <Card key={post.id}>
+      <CardBody>
+        <div className="flex flex-col gap-4">
+          {/* Post Author & Time */}
+          <div className="flex justify-between">
+            <div className="flex items-start justify-start">
+              <Avatar
+                className="avatar-size"
+                name={post.author.name}
+                src={post.author.avatar || undefined}
+              />
+              <div className="flex flex-col">
+                <span className="ml-2">{post.author.name}</span>
+                <span className="ml-2 text-xs text-gray-400">
+                  {/* Replace this with your time calculation */}
+                  {calculateTimeDifference(post.createAt)}
+                </span>
+              </div>
+            </div>
+            <HiDotsHorizontal />
+          </div>
+
+          {/* Post Content */}
+          <div>{post.content}</div>
+
+          {/* Attachments */}
+          {post.attachments.length > 0 && (
+            <div className="flex flex-col">
+              <Image src={`${post.attachments[0].attachment}`} alt="" className="w-full h-auto" />
+
+              {/* Render thêm hình ảnh như hình vuông nhỏ bên dưới hình ảnh đầu tiên */}
+              {post.attachments.length > 0 && (
+              <div className="grid grid-cols-3 gap-2 mt-2">
+                {post.attachments.length > 1 && (
+                  <div className="relative">
+                    <img
+                      src={post.attachments[1].attachment}
+                      alt=""
+                      className="w-full h-40 object-cover rounded"
+                    />
+                  </div>
+                )}
+
+                {/* Hình ảnh thứ hai */}
+                {post.attachments.length > 2 && (
+                  <div className="relative">
+                    <img
+                      src={post.attachments[2].attachment}
+                      alt=""
+                      className="w-full h-40 object-cover rounded"
+                    />
+                  </div>
+                )}
+
+                {/* Hình ảnh thứ ba với số lượng hình ảnh còn lại */}
+                {post.attachments.length > 3 && (
+                  <div className="relative">
+                    <img
+                      src={post.attachments[3].attachment} // Hiển thị hình thứ 3
+                      alt={`third-${2}`}
+                      className="w-full h-40 object-cover rounded"
+                    />
+                    <span className="absolute w-full h-full flex justify-center items-center top-0 left-0 text-3xl font-bold text-white bg-black bg-opacity-50 p-1 rounded">
+                      +{post.attachments.length - 4} {/* Số lượng hình ảnh còn lại */}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+            </div>
+          )}
+
+          {/* Like & Comment Section */}
+          <div className="flex justify-between text-sm">
+            <div>Lượt thích</div>
+            <div>{post.comment.length} bình luận</div>
+          </div>
+
+          {/* Interactions */}
+          <div className="flex flex-col gap-1">
+            <hr className="border-gray-500" />
+            <div className="flex flex-row w-full items-center">
+              <LikeButton postId={post.id} emojiPost={emojiPost} setEmojiPost={setEmojiPost}/>
+              <hr className="vertical-hr bg-gray-500" />
+              <div
+                className="flex flex-row items-center py-1 px-11 hover:bg-[#e5dfca] hover:text-[#102530] hover:rounded-md transition-all"
+                onMouseDownCapture={onOpenPostPopup}
+              >
+                <FaRegCommentAlt />
+                <span className="ml-2 select-none">Bình luận</span>
+              </div>
+              <hr className="vertical-hr bg-gray-500" />
+              <div
+                className="flex flex-row items-center py-1 px-11 hover:bg-[#e5dfca] hover:text-[#102530] hover:rounded-md transition-all"
+                onMouseDownCapture={() => Share(post.id)}
+              >
+                <ShareModal isOpen={isOpenShare} onOpenChange={onOpenChangeShare} postId={post.id}/>
+                <FaShareSquare />
+                <span className="ml-2 select-none">Chia sẻ</span>
+              </div>
+            </div>
+
+            {/* Comments and Post Popup */}
+            <hr className="border-gray-500" />
+            <div className="flex flex-row justify-start mt-2">
+              <Avatar
+                className="avatar-size select-none w-[40px] h-[40px]"
+                name={localStorage.getItem("name") || undefined}
+                src={localStorage.getItem("avatar") || undefined}
+              />
+              <div className="flex flex-col w-11/12">
+                <CommentForm postId={post.id} />
+              </div>
+            </div>
+
+            {/* Show comments popup if there are comments */}
+            {post.comment.length > 0 && (
+              <>
+                <div className="flex justify-end">
+                  <PostDetailPopup isOpen={isOpenPostPopup} onOpenChange={onOpenChangePostPopup} post={post} />
+                  <div onMouseDownCapture={onOpenPostPopup} className="text-sm select-none pt-2 px-2 hover:text-gray-300 cursor-pointer">
+                    Xem tất cả bình luận
+                  </div>
+                </div>
+                <div className="relative grid grid-cols-10 mt-2">
+                  {/* Render first comment */}
+                  <div className="col-span-1">
+                    <Avatar
+                      className="avatar-size select-none w-[40px] h-[40px]"
+                      name={post.comment[0].author.name}
+                      src={post.comment[0].author.avatar || undefined}
+                    />
+                  </div>
+                  <div className="col-span-9 h-fit">
+                    {post.comment[0].content ? (
+                      <div className="flex flex-row justify-start items-center max-w-full">
+                        <div
+                          className="px-4 py-2 rounded-3xl"
+                          style={{
+                            backgroundColor: "#3a3b3c",
+                            maxWidth: "85%",
+                            whiteSpace: "normal",
+                            overflowWrap: "break-word",
+                            wordWrap: "break-word",
+                          }}
+                        >
+                          <span className="text-sm">{post.comment[0].author.name}</span>
+                          <p className="text-sm">{post.comment[0].content}</p>
+                        </div>
+                        <HiDotsHorizontal className="ml-2" />
+                      </div>
+                    ) : (
+                      <div className="flex flex-row justify-start items-center max-w-full">
+                        <span className="text-sm">{post.comment[0].author.name}</span>
+                        <HiDotsHorizontal className="ml-2" />
+                      </div>
+                    )}
+                    {post.comment[0].attachment && (
+                      <img
+                        src={post.comment[0].attachment}
+                        alt={`CommentAttachment-${post.comment[0].id}`}
+                        className="mt-1 max-w-full h-auto rounded-3xl"
+                        style={{
+                          maxHeight: "65%",
+                          maxWidth: "65%"
+                        }}
+                      />
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </CardBody>
+    </Card>
+  );
+};
+
 export default function IndexPage() {
   const {
     isOpen: isOpenCreatePost,
@@ -88,6 +286,7 @@ export default function IndexPage() {
   const [showEmotions, setShowEmotions] = useState<{ [key: string]: boolean }>({}); // Trạng thái cho từng bài viết
   const hoverTimeoutRefs = useRef<{ [key: string]: number | null }>({}); // Timeout cho từng bài viết
   const closeTimeoutRefs = useRef<{ [key: string]: number | null }>({}); // Timeout đóng cho từng bài viết
+  const [emojiPost, setEmojiPost] = useState<{ [key: string]: FeelingGUI | null }>({});
   
   const handleMouseEnterLike = (postId: string) => {
     // Khi chuột hover vào nút "Thích"
@@ -134,7 +333,7 @@ export default function IndexPage() {
 
   // Tạo một mảng refs để tham chiếu đến nhiều Textareas
   // const textareaRefs = useRef<(HTMLTextAreaElement | null)[]>([]);
-  const [textAreaComment, setTextAreaComment] = useState<{[key: string]: string | null}>({});
+  // const [textAreaComment, setTextAreaComment] = useState<{[key: string]: string | null}>({});
   // Hàm để lưu ref của mỗi Textarea
   // const setTextareaRef = (element: HTMLTextAreaElement | null, index: number) => {
   //   textareaRefs.current[index] = element;
@@ -183,6 +382,7 @@ export default function IndexPage() {
 
   // Danh sách các emoji phản ứng cố định
   const reactionEmojis = ['1f44d','2764-fe0f','1f606','1f62e','1f622','1f621'];
+  const reactionEmojisString = ['Thích','Yêu thích','Haha','Wow','Buồn','Phẫn nộ'];
 
   const calculateTimeDifference = (timePost: Date) => {
     const now = new Date();
@@ -262,6 +462,26 @@ export default function IndexPage() {
 
           // Thêm các ID bài viết mới vào loadedPostsRef
           filteredPosts.forEach((post) => loadedPostsRef.current.add(post.id));
+          filteredPosts.forEach((post) => {
+            var userFeeling = post.feeling.find(
+              (x) => x.author.id === localStorage.getItem("id"),
+            );
+            var userReact: FeelingGUI | null = null;
+            // Ensure userFeeling is not undefined
+            if (userFeeling) {
+              userReact = {
+                typeReact: userFeeling.typeReact,
+                name: reactionEmojisString[
+                  reactionEmojis.indexOf(userFeeling?.typeReact)
+                ],
+              }
+              setEmojiPost((prev) => ({
+                ...prev,
+                [post.id]: userReact || null, // Ensure value is either string or null
+              }));
+            }
+            console.log(emojiPost);
+          });
         }
 
         // Kiểm tra điều kiện ngừng tải thêm bài viết
@@ -406,11 +626,6 @@ export default function IndexPage() {
     };
   }, []); // Chạy một lần khi component mount
 
-  const Share = (postId: string) => {
-    setSharePostId(postId);
-    onOpenShare();
-  }
-
   // const removeImage = (postId: string) => {
   //   // Xóa file đã chọn và hình ảnh xem trước
   //   setImagePreviews((prevPreviews) => {
@@ -508,46 +723,9 @@ export default function IndexPage() {
                   </Button>
                 </div>
                 <div />
-                {/* <span className={title()}>Make&nbsp;</span>
-                <span className={title({ color: "violet" })}>beautiful&nbsp;</span>
-                <br />
-                <span className={title()}>
-                  websites regardless of your design experience.
-                </span>
-                <div className={subtitle({ class: "mt-4" })}>
-                  Beautiful, fast and modern React UI library.
-                </div> */}
               </div>
 
-              {/* <div className="flex gap-3">
-                <Link
-                  isExternal
-                  className={buttonStyles({
-                    color: "primary",
-                    radius: "full",
-                    variant: "shadow",
-                  })}
-                  href={siteConfig.links.docs}
-                >
-                  Documentation
-                </Link>
-                <Link
-                  isExternal
-                  className={buttonStyles({ variant: "bordered", radius: "full" })}
-                  href={siteConfig.links.github}
-                >
-                  <GithubIcon size={20} />
-                  GitHub
-                </Link>
-              </div> */}
-
               <div className="mt-8">
-                {/* <Snippet hideCopyButton hideSymbol variant="bordered">
-                  <span>
-                    Get started by editing{" "}
-                    <Code color="primary">pages/index.tsx</Code>
-                  </span>
-                </Snippet> */}
               </div>
             </section>
             <section
@@ -598,15 +776,6 @@ export default function IndexPage() {
                     </Card>
                   ))}
                 </div>
-                {/* <span className={title()}>Make&nbsp;</span>
-                <span className={title({ color: "violet" })}>beautiful&nbsp;</span>
-                <br />
-                <span className={title()}>
-                  websites regardless of your design experience.
-                </span>
-                <div className={subtitle({ class: "mt-4" })}>
-                  Beautiful, fast and modern React UI library.
-                </div> */}
               </div>
             </section>
           </section>
@@ -653,207 +822,7 @@ export default function IndexPage() {
                   </CardBody>
                 </Card>
                 {posts.map((post: Post, index: number) => (
-                  <Card key={post.id}>
-                    <CardBody>
-                      <div className="flex flex-col gap-4">
-                        <div className="flex justify-between">
-                          <div className="flex items-start justify-start">
-                            <Avatar
-                              className="avatar-size"  // Thêm class cho Avatar
-                              name={
-                                post.author.avatar
-                                  ? undefined
-                                  : post.author.name || undefined
-                              }
-                              src={post.author.avatar || undefined}
-                            />
-                            <div className="flex flex-col">
-                              <span className="ml-2">{post.author.name}</span>
-                              <span className="ml-2 text-xs text-gray-400">
-                                {calculateTimeDifference(post.createAt)}
-                              </span>
-                            </div>
-                          </div>
-                          <TbDotsVertical />
-                        </div>
-                        <div className="">{post.content}</div>
-                        {/* Render the first image prominently */}
-                        {post.attachments.length > 0 && (
-                          <div className="flex flex-col">
-                            <img src={post.attachments[0].attachment} alt="" className="w-full h-auto" />
-
-                            {/* Render thêm hình ảnh như hình vuông nhỏ bên dưới hình ảnh đầu tiên */}
-                            {post.attachments.length > 0 && (
-                            <div className="grid grid-cols-3 gap-2 mt-2">
-                              {/* Hình ảnh đầu tiên */}
-                              {/* <div className="relative">
-                                <img
-                                  src={post.attachments[0].attachment}
-                                  alt=""
-                                  className="w-full h-40 object-cover rounded" // Kích thước của hình
-                                />
-                              </div> */}
-                              
-                              {/* Hình ảnh thứ hai */}
-                              {post.attachments.length > 1 && (
-                                <div className="relative">
-                                  <img
-                                    src={post.attachments[1].attachment}
-                                    alt=""
-                                    className="w-full h-40 object-cover rounded"
-                                  />
-                                </div>
-                              )}
-
-                              {/* Hình ảnh thứ hai */}
-                              {post.attachments.length > 2 && (
-                                <div className="relative">
-                                  <img
-                                    src={post.attachments[2].attachment}
-                                    alt=""
-                                    className="w-full h-40 object-cover rounded"
-                                  />
-                                </div>
-                              )}
-
-                              {/* Hình ảnh thứ ba với số lượng hình ảnh còn lại */}
-                              {post.attachments.length > 3 && (
-                                <div className="relative">
-                                  <img
-                                    src={post.attachments[3].attachment} // Hiển thị hình thứ 3
-                                    alt={`third-${2}`}
-                                    className="w-full h-40 object-cover rounded"
-                                  />
-                                  <span className="absolute w-full h-full flex justify-center items-center top-0 left-0 text-3xl font-bold text-white bg-black bg-opacity-50 p-1 rounded">
-                                    +{post.attachments.length - 4} {/* Số lượng hình ảnh còn lại */}
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                          )}
-                          </div>
-                        )}
-                        <div className="flex justify-between text-sm">
-                          <div>
-                            Lượt thích
-                          </div>
-                          <div>
-                            {post.comment.length} bình luận
-                          </div>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <hr className="border-gray-500"/>
-                          <div className="flex flex-row w-full items-center">
-                            <div
-                              className="flex flex-row items-center py-1 px-12 hover:bg-[#e5dfca] hover:text-[#102530] hover:rounded-md transition-all hover-div"
-                              onMouseEnter={() => handleMouseEnterLike(post.id)}
-                              onMouseLeave={() => handleMouseLeaveLike(post.id)}>
-                              <AiOutlineLike />
-                              <span className="ml-2 select-none">Thích</span>
-                            </div>
-                            {/* Bản chọn cảm xúc */}
-                            {/* {showEmotions[post.id] && ( */}
-                              <div
-                                className="absolute left-0 bottom-[105px] shadow-lg"
-                                onMouseEnter={() => handleMouseEnterEmoji(post.id)}
-                                onMouseLeave={() => handleMouseLeaveEmoji(post.id)}
-                              >
-                                {/* <div className="flex gap-2 mt-2 text-xl">
-                                  <span role="img" aria-label="like"></span>
-                                  <span role="img" aria-label="love">😍</span>
-                                  <span role="img" aria-label="haha">😂</span>
-                                  <span role="img" aria-label="sad">😢</span>
-                                </div> */}
-                                <EmojiPicker
-                                  style={{
-                                    opacity: showEmotions[post.id] ? 1 : 0,
-                                    transform: showEmotions[post.id] ? 'translateY(0)' : 'translateY(10px)',
-                                    transition: 'opacity 0.3s ease-out, transform 0.3s ease-out'
-                                  }}
-                                  open={showEmotions[post.id]}
-                                  lazyLoadEmojis
-                                  reactions={reactionEmojis}
-                                  reactionsDefaultOpen={true} // Hiển thị thanh phản ứng mặc định
-                                  onReactionClick={onEmojiClick} // Sự kiện khi người dùng nhấp vào emoji
-                                  allowExpandReactions={false} // Không cho phép mở rộng toàn bộ picker
-                                  searchDisabled={true} // Vô hiệu hóa thanh tìm kiếm
-                                  skinTonesDisabled={true} // Vô hiệu hóa chọn tone màu da
-                                  emojiStyle={EmojiStyle.FACEBOOK}
-                                />
-                              </div>
-                            {/* )} */}
-                            <hr className="vertical-hr bg-gray-500" />
-                            <div
-                              className="flex flex-row items-center py-1 px-12 hover:bg-[#e5dfca] hover:text-[#102530] hover:rounded-md transition-all"
-                              // onMouseDownCapture={() => handleCommentClick(index)}
-                            >
-                              <FaRegCommentAlt />
-                              <span className="ml-2 select-none">Bình luận</span>
-                            </div>
-                            <hr className="vertical-hr bg-gray-500" />
-                            <div className="flex flex-row items-center py-1 px-12 hover:bg-[#e5dfca] hover:text-[#102530] hover:rounded-md transition-all" onMouseDownCapture={() => Share(post.id)}>
-                              <FaShareSquare />
-                              <span className="ml-2 select-none">Chia sẻ</span>
-                            </div>
-                          </div>
-                          <hr className="border-gray-500" />
-                          <div className="flex flex-row justify-start mt-2">
-                            <Avatar
-                              className="avatar-size select-none w-[40px] h-[40px]"
-                              name={
-                                localStorage.getItem("avatar")
-                                  ? undefined
-                                  : localStorage.getItem("name") || undefined
-                              }
-                              src={localStorage.getItem("avatar") || undefined}
-                            />
-                            <div className="flex flex-col w-11/12">
-                              {/* <Textarea
-                                name="content"
-                                value={formik.values.content}
-                                onChange={formik.handleChange}
-                                placeholder="Nhập bình luận"
-                                onKeyDown={(e) => {
-                                  if (e.key === "Enter" && !e.shiftKey) {
-                                    e.preventDefault();
-                                    if (isReady || selectedFiles[post.id] != null || !formik.isSubmitting) {
-                                      formik.handleSubmit(); // Truyền cả postId và index
-                                    }
-                                  }
-                                }}
-                                minRows={1}
-                                maxRows={5}
-                                style={{ resize: "none", whiteSpace: "pre-wrap" }}
-                                endContent={(
-                                  <div className="flex flex-row gap-3">
-                                    <input
-                                      ref={(el) => (inputRefs.current[index] = el)}
-                                      accept="image/jpeg, image/png, image/gif, image/svg+xml"
-                                      style={{ display: "none" }}
-                                      type="file"
-                                      onChange={(event) => handleFileChange(event, post.id)} // Truyền postId vào hàm
-                                    />
-                                    <button onClick={() => inputRefs.current[index]?.click()} className="flex items-center">
-                                      <IoMdImages style={{ fontSize: "20px" }} />
-                                    </button>
-                                    <button
-                                      disabled={!selectedFiles[post.id] && !isReady}
-                                      onClick={formik.handleSubmit}
-                                      className={`flex items-center ${!selectedFiles[post.id] && !isReady ? 'cursor-not-allowed opacity-50' : ''}`}
-                                    >
-                                      <IoSend />
-                                    </button>
-                                  </div>
-                                )}
-                              /> */}
-                              {/* Hiển thị hình preview dưới Textarea chỉ cho post hiện tại */}
-                              <CommentForm postId={post.id} />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </CardBody>
-                  </Card>
+                  <PostCard key={post.id} post={post} emojiPost={emojiPost} setEmojiPost={setEmojiPost} />
                 ))}
                 {isLoading ? (
                   <div className="flex justify-center">

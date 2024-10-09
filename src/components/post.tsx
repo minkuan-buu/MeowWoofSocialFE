@@ -2,7 +2,7 @@ import { connect, useFormik } from "formik";
 import * as Yup from "yup";
 
 import toast, { Toaster } from 'react-hot-toast';
-import { Avatar, Input, Modal, ModalBody, ModalContent, ModalHeader, Textarea } from "@nextui-org/react";
+import { Avatar, Input, Modal, ModalBody, ModalContent, ModalHeader, Textarea, useDisclosure } from "@nextui-org/react";
 import { title } from "./primitives";
 import React, { Dispatch, SetStateAction, useRef, useState } from "react";
 import "../styles/input-file.css"
@@ -12,12 +12,19 @@ import { FiXCircle } from "react-icons/fi";
 import { FaCircleXmark, FaX } from "react-icons/fa6";
 import { CREATEPOST } from "@/api/Post";
 import { Post } from "@/interface/post";
+import { HiDotsHorizontal } from "react-icons/hi";
+import { CommentForm } from "./comment";
+import { FaRegCommentAlt, FaShareSquare } from "react-icons/fa";
+import { AiOutlineLike } from "react-icons/ai";
+import { LikeButton } from "./likeButton";
+import { calculateTimeDifference } from "./func/postFunc";
+import { ShareModal } from "./share";
 
 interface CreatePostProps {
-    isOpen: boolean;
-    onOpenChange: () => void;
-    setPosts: Dispatch<SetStateAction<Post[]>>;
-  }
+  isOpen: boolean;
+  onOpenChange: () => void;
+  setPosts: Dispatch<SetStateAction<Post[]>>;
+}
   
 export const CreatePost: React.FC<CreatePostProps> = ({
     isOpen,
@@ -140,7 +147,7 @@ export const CreatePost: React.FC<CreatePostProps> = ({
                 throw new Error(errorResponse.message); // Ném lỗi để toast xử lý
               } else {
                 setOnLoading(false);
-                throw new Error("Không thể đăng nhập!"); // Lỗi chung
+                throw new Error("Không thể đăng bài viết!"); // Lỗi chung
               }
             } catch (error: any) {
               setOnLoading(false);
@@ -206,24 +213,23 @@ export const CreatePost: React.FC<CreatePostProps> = ({
                         onChange={handleFileChange}
                         />
                         <div className="flex justify-end mt-4">
-                        <button
-                            type="button"
-                            onClick={onChooseFile}
+                        <div
+                            onMouseDownCapture={onChooseFile}
                         >
                             Thêm Hình Ảnh
-                        </button>
+                        </div>
                         </div>
                         <div className="flex flex-wrap justify-center mt-2">
                         {imagePreviews.map((preview, index) => (
-                            <div key={index} className="relative m-2">
-                                <img src={preview} alt={`preview-${index}`} className="w-32 h-32 object-cover" />
-                                <button
-                                    className="absolute top-0 right-0 text-xl text-gray-600 rounded-full p-1 hover:text-red-600"
-                                    onClick={() => removeImage(index)}
-                                >
-                                    <FaCircleXmark />
-                                </button>
+                          <div key={index} className="relative m-2">
+                            <img src={preview} alt={`preview-${index}`} className="w-32 h-32 object-cover" />
+                            <div
+                                className="absolute top-0 right-0 text-xl text-gray-600 rounded-full p-1 hover:text-red-600"
+                                onMouseDownCapture={() => removeImage(index)}
+                            >
+                                <FaCircleXmark />
                             </div>
+                          </div>
                         ))}
                         </div>
                     </div>
@@ -263,6 +269,158 @@ export const CreatePost: React.FC<CreatePostProps> = ({
                     Đăng
                   </Button>
                 </form>
+              </div>
+            </ModalBody>
+          </>
+        )}
+      </ModalContent>
+    </Modal>
+  );
+}
+
+interface PostDetailPopupProps {
+  isOpen: boolean;
+  onOpenChange: () => void;
+  post: Post;
+}
+
+export const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
+  isOpen,
+  onOpenChange,
+  post,
+}) => {
+  const {
+    isOpen: isOpenShare,
+    onOpen: onOpenShare,
+    onOpenChange: onOpenChangeShare,
+  } = useDisclosure();
+  const [sharePostId, setSharePostId] = useState<string>("");
+  const Share = (postId: string) => {
+    setSharePostId(postId);
+    onOpenShare();
+  }
+  return (
+    <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="2xl">
+      <ModalContent>
+        {(onClose) => (
+          <>
+            <ModalHeader className="flex justify-center">
+              <span>Bài viết của {post.author.name}</span>
+            </ModalHeader>
+            <ModalBody className="overflow-y-auto max-h-[80vh]"> {/* Thêm max-height để đảm bảo modal không chiếm hết không gian */}
+              <div className="flex flex-col gap-4">
+                <div className="flex justify-between">
+                  <div className="flex items-start justify-start">
+                    <Avatar
+                      className="avatar-size"
+                      name={post.author.avatar ? undefined : post.author.name || undefined}
+                      src={post.author.avatar || undefined}
+                    />
+                    <div className="flex flex-col">
+                      <span className="ml-2">{post.author.name}</span>
+                      <span className="ml-2 text-xs text-gray-400">
+                        {calculateTimeDifference(post.createAt)}
+                      </span>
+                    </div>
+                  </div>
+                  <HiDotsHorizontal />
+                </div>
+                <div>{post.content}</div>
+                {post.attachments.length > 0 && (
+                  <div className="flex flex-col">
+                    <img src={post.attachments[0].attachment} alt="" className="w-full h-auto" />
+                    <div className="grid grid-cols-3 gap-2 mt-2">
+                      {post.attachments.slice(1).map((attachment, index) => (
+                        <div key={index} className="relative">
+                          <img src={attachment.attachment} alt="" className="w-full h-40 object-cover rounded" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="flex justify-between text-sm">
+                  <div>Lượt thích</div>
+                  <div>{post.comment.length} bình luận</div>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <hr className="border-gray-500" />
+                  <div className="flex flex-row w-full items-center">
+                    <LikeButton postId={post.id} />
+                    <hr className="vertical-hr bg-gray-500" />
+                    <div className="flex flex-row items-center py-1 px-12 hover:bg-[#e5dfca] hover:text-[#102530] hover:rounded-md transition-all">
+                      <FaRegCommentAlt />
+                      <span className="ml-2 select-none">Bình luận</span>
+                    </div>
+                    <hr className="vertical-hr bg-gray-500" />
+                    <div className="flex flex-row items-center py-1 px-12 hover:bg-[#e5dfca] hover:text-[#102530] hover:rounded-md transition-all" onMouseDownCapture={() => Share(post.id)}>
+                      <ShareModal isOpen={isOpenShare} onOpenChange={onOpenChangeShare} postId={post.id}/>
+                      <FaShareSquare />
+                      <span className="ml-2 select-none">Chia sẻ</span>
+                    </div>
+                  </div>
+                  <hr className="border-gray-500" />
+                  <div className="flex flex-row justify-start mt-2">
+                    <Avatar
+                      className="avatar-size select-none w-[40px] h-[40px]"
+                      name={localStorage.getItem("avatar") ? undefined : localStorage.getItem("name") || undefined}
+                      src={localStorage.getItem("avatar") || undefined}
+                    />
+                    <div className="flex flex-col w-11/12">
+                      <CommentForm postId={post.id} />
+                    </div>
+                  </div>
+                  {post.comment && (
+                    <>
+                      {post.comment.map((comment) => (
+                        <div className="relative grid grid-cols-10 mt-2" key={comment.id}>
+                          <div className="col-span-1">
+                            <Avatar
+                              className="avatar-size select-none w-[40px] h-[40px]"
+                              name={comment.author.avatar ? undefined : comment.author.name || undefined}
+                              src={comment.author.avatar || undefined}
+                            />
+                          </div>
+                          <div className="col-span-9 h-fit">
+                            {comment.content ? (
+                              <div className="flex flex-row justify-start items-center max-w-full">
+                                <div 
+                                  className="px-4 py-2 rounded-3xl" 
+                                  style={{
+                                    backgroundColor: "#3a3b3c",
+                                    maxWidth: "85%",
+                                    whiteSpace: "normal",
+                                    overflowWrap: "break-word",
+                                    wordWrap: "break-word",
+                                  }}
+                                >
+                                  <span className="text-sm">{comment.author.name}</span>
+                                  <p className="text-sm">{comment.content}</p>
+                                </div>
+                                <HiDotsHorizontal className="ml-2" />
+                              </div>
+                            ) : (
+                              <div className="flex flex-row justify-start items-center">
+                                <span className="text-sm">{comment.author.name}</span>
+                                <HiDotsHorizontal className="ml-2" />
+                              </div>
+                            )}
+                            {comment.attachment && (
+                              <img
+                                src={comment.attachment}
+                                alt={`CommentAttachment-${comment.id}`}
+                                className="mt-1 max-w-full h-auto rounded-3xl"
+                                style={{
+                                  maxHeight: "65%",
+                                  maxWidth: "65%"
+                                }}
+                              />
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </>
+                  )}
+                </div>
               </div>
             </ModalBody>
           </>

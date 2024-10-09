@@ -43,6 +43,7 @@ export const LoginForm = () => {
           if (response.isSuccess && 'data' in response.res!) {
             const successResponse = response.res.data;
             setOnLoading(false);
+            localStorage.setItem("id", successResponse.id);
             localStorage.setItem("token", successResponse.token);
             localStorage.setItem("name", successResponse.name);
             localStorage.setItem("role", successResponse.role);
