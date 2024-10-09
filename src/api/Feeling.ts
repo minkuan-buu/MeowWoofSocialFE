@@ -12,6 +12,7 @@ export const CREATEFEELING: ApiCall<
     const res = await fetch(API_URL + `react/create-reaction`, {
       method: "POST",
       headers: {
+        "Content-Type": "application/json",
         "Authorization": "Bearer " + body.token
       },
       body: JSON.stringify(body.FeelingReq),

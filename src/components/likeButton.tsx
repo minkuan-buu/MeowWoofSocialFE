@@ -1,4 +1,5 @@
-import { FeelingGUI } from "@/interface/feeling";
+import { CREATEFEELING } from "@/api/Feeling";
+import { CreateFeelingReq, FeelingGUI } from "@/interface/feeling";
 import EmojiPicker, { Emoji, EmojiClickData, EmojiStyle } from "emoji-picker-react";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { AiOutlineLike } from "react-icons/ai";
@@ -59,14 +60,36 @@ export const LikeButton: React.FC<LikeButtonProps> = ({
         }, 3000); // 3 giây
     };
 
-    const onEmojiClick = (postId: string, emojiData: EmojiClickData) => {
+    const CreateFeeling = async (postId: string, typeReact: string) => {
+        if (!localStorage.token) return;
+        try {
+            const req: CreateFeelingReq = {
+                postId: postId,
+                typeReact: typeReact,
+            }
+            const result = await CREATEFEELING({
+                FeelingReq: req,
+                token: localStorage.token
+            });
+            if (result.isSuccess && result.res != null) {
+                return;
+            } else {
+                console.log(result.res)
+            }
+        } catch(e) {
+            console.log(e);
+        }
+    }
+
+    const onEmojiClick = async (postId: string, emojiData: EmojiClickData) => {
         setSelectedEmoji(emojiData.emoji);
         console.log(`${postId}: ${emojiData.emoji}`);
         // Ẩn tất cả các thanh cảm xúc sau khi chọn emoji
         // Ensure userFeeling is not undefined
-        if(emojiPost[postId] != null){
-            
+        if(emojiPost[postId] == null){
+            await CreateFeeling(postId, emojiData.unified)
         }
+
         var userReact: FeelingGUI = {
             typeReact: emojiData.unified,
             name: reactionEmojisString[
