@@ -210,7 +210,7 @@ const PostCard: React.FC<{ post: Post, emojiPost: {[key: string]: FeelingGUI | n
             {post.comment.length > 0 && (
               <>
                 <div className="flex justify-end">
-                  <PostDetailPopup isOpen={isOpenPostPopup} onOpenChange={onOpenChangePostPopup} post={post} />
+                  <PostDetailPopup isOpen={isOpenPostPopup} onOpenChange={onOpenChangePostPopup} post={post} setEmojiPost={setEmojiPost} emojiPost={emojiPost}/>
                   <div onMouseDownCapture={onOpenPostPopup} className="text-sm select-none pt-2 px-2 hover:text-gray-300 cursor-pointer">
                     Xem tất cả bình luận
                   </div>

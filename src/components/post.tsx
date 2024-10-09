@@ -19,6 +19,7 @@ import { AiOutlineLike } from "react-icons/ai";
 import { LikeButton } from "./likeButton";
 import { calculateTimeDifference } from "./func/postFunc";
 import { ShareModal } from "./share";
+import { FeelingGUI } from "@/interface/feeling";
 
 interface CreatePostProps {
   isOpen: boolean;
@@ -282,12 +283,18 @@ interface PostDetailPopupProps {
   isOpen: boolean;
   onOpenChange: () => void;
   post: Post;
+  emojiPost: {[key: string]: FeelingGUI | null};
+  setEmojiPost: Dispatch<SetStateAction<{
+    [key: string]: FeelingGUI | null;
+  }>>
 }
 
 export const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
   isOpen,
   onOpenChange,
   post,
+  emojiPost,
+  setEmojiPost
 }) => {
   const {
     isOpen: isOpenShare,
@@ -345,7 +352,7 @@ export const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
                 <div className="flex flex-col gap-1">
                   <hr className="border-gray-500" />
                   <div className="flex flex-row w-full items-center">
-                    <LikeButton postId={post.id} />
+                    <LikeButton postId={post.id} emojiPost={emojiPost} setEmojiPost={setEmojiPost}/>
                     <hr className="vertical-hr bg-gray-500" />
                     <div className="flex flex-row items-center py-1 px-12 hover:bg-[#e5dfca] hover:text-[#102530] hover:rounded-md transition-all">
                       <FaRegCommentAlt />
