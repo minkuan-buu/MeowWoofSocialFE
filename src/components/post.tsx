@@ -20,6 +20,7 @@ import { LikeButton } from "./likeButton";
 import { calculateTimeDifference } from "./func/postFunc";
 import { ShareModal } from "./share";
 import { FeelingGUI } from "@/interface/feeling";
+import Logout from "./logout";
 
 interface CreatePostProps {
   isOpen: boolean;
@@ -120,6 +121,12 @@ export const CreatePost: React.FC<CreatePostProps> = ({
           selectedFiles.forEach((file, index) => {
             formData.append(`Attachment`, file);
           });
+          // var contentUnicodeEscape = convertToUnicodeEscape(values.Content);
+          // console.log(contentUnicodeEscape);
+          var hashtags = extractHashtags(values.Content);
+          hashtags.forEach((hashtag) => {
+            formData.append(`HashTag`, hashtag);  // Đổi thành HashTag thay vì Hashtags
+          });
           // Toast for login process
           toast.promise(callAPICreatePost(formData, localStorage.token), {
             loading: "Đang đăng bài viết...",
@@ -140,12 +147,17 @@ export const CreatePost: React.FC<CreatePostProps> = ({
                 closeModal();
                 return successResponse;
               } else if ('message' in response.res!) {
-                const errorResponse = response.res as { message: string };
-                setOnLoading(false);
-                if(errorResponse.message == "You are banned from posting due to violate of terms!"){
-                  errorResponse.message = "Bạn đã bị cấm đăng bài do vi phạm tiêu chuẩn cộng đồng";
+                if(response.statusCode === 401) {
+                  Logout();
+                  throw new Error("Phiên đăng nhập đã hết hạn!");
+                } else {
+                  const errorResponse = response.res as { message: string };
+                  setOnLoading(false);
+                  if(errorResponse.message == "You are banned from posting due to violate of terms!"){
+                    errorResponse.message = "Bạn đã bị cấm đăng bài do vi phạm tiêu chuẩn cộng đồng";
+                  }
+                  throw new Error(errorResponse.message); // Ném lỗi để toast xử lý
                 }
-                throw new Error(errorResponse.message); // Ném lỗi để toast xử lý
               } else {
                 setOnLoading(false);
                 throw new Error("Không thể đăng bài viết!"); // Lỗi chung
@@ -158,6 +170,13 @@ export const CreatePost: React.FC<CreatePostProps> = ({
         },
     });
 
+    function extractHashtags(content: string | null): string[] {
+      if (!content) return [];
+      // Biểu thức chính quy để nhận diện hashtag
+      const hashtags = content.match(/#[^\s!@#$%^&*()=+.\/,\[{\]};:'"?><]+/g);
+      return hashtags || []; // Trả về mảng hashtag hoặc mảng rỗng nếu không có hashtag nào
+    }
+    
     function closeModal(){
       formik.resetForm();
       setSelectedFiles([]);

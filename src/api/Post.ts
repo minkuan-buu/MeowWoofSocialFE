@@ -3,55 +3,63 @@ import { API_URL } from "./Endpoint";
 
 export const NEWSFEED: ApiCall<
   { PageSize: number; lastPostId: string; token: string },
-  {
-    data: Post[]
-  }
+  { data: Post[] }
 > = async (body) => {
-  try {
-    const res = await fetch(API_URL + `posts/news-feed?PageSize=${body.PageSize}&lastPostId=${body.lastPostId}`, {
+  const res = await fetch(
+    API_URL + `posts/news-feed?PageSize=${body.PageSize}&lastPostId=${body.lastPostId}`,
+    {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer " + body.token
+        "Authorization": "Bearer " + body.token,
       },
-    });
-
-    if (res.ok) {
-      const data = await res.json();
-      return { isSuccess: true, res: data }; // Trả về dữ liệu nếu thành công
-    } else {
-      const errorData = await res.json(); // Lấy chi tiết lỗi
-      return { isSuccess: false, res: errorData }; // Trả về lỗi từ server
     }
+  );
+
+  try {
+    const data = await res.json();
+
+    return {
+      isSuccess: res.ok, // Kiểm tra trạng thái 2xx
+      res: res.ok ? data : null, // Chỉ trả về dữ liệu nếu thành công
+      statusCode: res.status, // Mã trạng thái HTTP
+    };
   } catch (error) {
-    return { isSuccess: false, res: { message: "Network error" } }; // Lỗi mạng
+    // Lỗi khi không thể parse JSON hoặc lỗi mạng
+    return {
+      isSuccess: false,
+      res: null,
+      statusCode: res.status,
+    };
   }
 };
 
 export const CREATEPOST: ApiCall<
-  { CreateReq: FormData, token: string },
-  {
-    data: Post;
-  }
+  { CreateReq: FormData; token: string },
+  { data: Post }
 > = async (body) => {
-  try {
-    const res = await fetch(API_URL + `posts/create-post`, {
-      method: "POST",
-      headers: {
-        "Authorization": "Bearer " + body.token
-      },
-      body: body.CreateReq
-    });
+  const res = await fetch(API_URL + `posts/create-post`, {
+    method: "POST",
+    headers: {
+      "Authorization": "Bearer " + body.token,
+    },
+    body: body.CreateReq,
+  });
 
-    if (res.ok) {
-      const data = await res.json();
-      return { isSuccess: true, res: data }; // Trả về dữ liệu nếu thành công
-    } else {
-      const errorData = await res.json(); // Lấy chi tiết lỗi
-      return { isSuccess: false, res: errorData }; // Trả về lỗi từ server
-    }
+  try {
+    const data = await res.json();
+    
+    return {
+      isSuccess: res.ok,
+      res: res.ok ? data : null,
+      statusCode: res.status,
+    };
   } catch (error) {
-    return { isSuccess: false, res: { message: "Network error" } }; // Lỗi mạng
+    return {
+      isSuccess: false,
+      res: null,
+      statusCode: 500, // Mã trạng thái lỗi mạng
+    };
   }
 };
 

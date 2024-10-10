@@ -14,24 +14,28 @@ export const LOGIN: ApiCall<
     }
   | { message: string }
 > = async (body) => {
-  try {
-    const res = await fetch(API_URL + "auth/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    });
+  const res = await fetch(API_URL + "auth/login", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
 
-    if (res.ok) {
-      const data = await res.json();
-      return { isSuccess: true, res: data }; // Trả về dữ liệu nếu thành công
-    } else {
-      const errorData = await res.json(); // Lấy chi tiết lỗi
-      return { isSuccess: false, res: errorData }; // Trả về lỗi từ server
-    }
+  try {
+    const data = await res.json();
+
+    return {
+      isSuccess: res.ok,
+      res: res.ok ? data : null,
+      statusCode: res.status,
+    };
   } catch (error) {
-    return { isSuccess: false, res: { message: "Network error" } }; // Lỗi mạng
+    return {
+      isSuccess: false,
+      res: null,
+      statusCode: 500, // Lỗi mạng
+    };
   }
 };
 
@@ -41,24 +45,27 @@ export const REGISTER: ApiCall<
     message: string
   }
 > = async (body) => {
+  const res = await fetch(API_URL + "auth/register", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+  
   try {
-    const res = await fetch(API_URL + "auth/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    });
+    const data = await res.json();
 
-    if (res.ok) {
-      const data = await res.json();
-
-      return { isSuccess: true, res: data };
-    } else {
-      const errorData = await res.json();
-      return { isSuccess: false, res: errorData };
-    }
+    return {
+      isSuccess: res.ok,
+      res: res.ok ? data : null,
+      statusCode: res.status,
+    };
   } catch (error) {
-    return { isSuccess: false, res: { message: "Network error" } }; // Lỗi mạng
+    return {
+      isSuccess: false,
+      res: null,
+      statusCode: 500, // Lỗi mạng
+    };
   }
 };

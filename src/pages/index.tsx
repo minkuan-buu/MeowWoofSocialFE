@@ -3,7 +3,7 @@ import { Snippet } from "@nextui-org/snippet";
 import { Code } from "@nextui-org/code";
 import { button as buttonStyles } from "@nextui-org/theme";
 
-import { Avatar, Button, Card, CardBody, CardHeader, Divider, Image, Input, Textarea, useDisclosure } from "@nextui-org/react";
+import { Avatar, Button, Card, CardBody, CardHeader, Divider, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Image, Input, Textarea, useDisclosure } from "@nextui-org/react";
 import { ourServices, siteConfig } from "@/config/site";
 import { title, subtitle } from "@/components/primitives";
 import { GithubIcon } from "@/components/icons";
@@ -12,7 +12,7 @@ import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import '../styles/status-bar.css';
 import { TbDotsVertical } from "react-icons/tb";
 import { AiOutlineLike } from "react-icons/ai";
-import { FaCommentAlt, FaRegCommentAlt, FaShareSquare } from "react-icons/fa";
+import { FaCommentAlt, FaRegBookmark, FaRegCommentAlt, FaShareSquare } from "react-icons/fa";
 import NonFooterLayout from "@/layouts/non-footer";
 import { NEWSFEED } from "@/api/Post";
 import { ThreeDot } from "react-loading-indicators";
@@ -23,7 +23,7 @@ import { CustomEmoji } from "emoji-picker-react/dist/config/customEmojiConfig";
 import { CreatePost, PostDetailPopup } from "@/components/post";
 import { Post } from "@/interface/post";
 import { ShareModal } from "@/components/share";
-import { IoSend } from "react-icons/io5";
+import { IoSend, IoWarningOutline } from "react-icons/io5";
 import { IoMdImages } from "react-icons/io";
 import { FaCircleXmark } from "react-icons/fa6";
 import { CREATECOMMENT } from "@/api/Comment";
@@ -33,6 +33,8 @@ import { HiDotsHorizontal } from "react-icons/hi";
 import { LikeButton } from "@/components/likeButton";
 import { calculateTimeDifference } from "@/components/func/postFunc";
 import { FeelingGUI } from "@/interface/feeling";
+import Logout from "@/components/logout";
+import { MdDelete, MdEdit } from "react-icons/md";
 
 interface newFeedPost{
   id: string;
@@ -110,7 +112,52 @@ const PostCard: React.FC<{ post: Post, emojiPost: {[key: string]: FeelingGUI | n
                 </span>
               </div>
             </div>
-            <HiDotsHorizontal />
+            <Dropdown>
+              <DropdownTrigger>
+              <Button className="!w-10 !h-10 !min-w-0 !p-0 bg-transparent hover:bg-gray-400 !rounded-full transition-all duration-300 flex items-center justify-center">
+                <HiDotsHorizontal style={{ width: "15px", height: "15px" }} />
+              </Button>
+              </DropdownTrigger>
+              {post.author.id === localStorage.getItem("id") ? (
+                <DropdownMenu variant="faded" aria-label="Dropdown menu with icons">
+                  <DropdownItem
+                    key="stored"
+                    startContent={<FaRegBookmark />}
+                  >
+                    Lưu bài viết
+                  </DropdownItem>
+                  <DropdownItem
+                    key="edit"
+                    startContent={<MdEdit />}
+                  >
+                    Chỉnh sửa bài viết
+                  </DropdownItem>
+                  <DropdownItem
+                    key="delete"
+                    className="text-danger"
+                    color="danger"
+                    startContent={<MdDelete />}
+                  >
+                    Xóa bài viết
+                  </DropdownItem>
+                </DropdownMenu>
+              ) : (
+                <DropdownMenu variant="faded" aria-label="Dropdown menu with icons">
+                  <DropdownItem
+                    key="stored"
+                    startContent={<FaRegBookmark />}
+                  >
+                    Lưu bài viết
+                  </DropdownItem>
+                  <DropdownItem
+                    key="report"
+                    startContent={<IoWarningOutline />}
+                  >
+                    Báo xấu
+                  </DropdownItem>
+                </DropdownMenu>
+              )}
+            </Dropdown>
           </div>
 
           {/* Post Content */}
@@ -480,7 +527,6 @@ export default function IndexPage() {
                 [post.id]: userReact || null, // Ensure value is either string or null
               }));
             }
-            console.log(emojiPost);
           });
         }
 
@@ -489,37 +535,41 @@ export default function IndexPage() {
           hasMoreRef.current = false; // Cập nhật hasMore bằng useRef
         }
       } else if (!result.isSuccess) {
-        toast.custom((t) => (
-          <div
-            className={`${
-              t.visible ? "animate-enter" : "animate-leave"
-            } max-w-md w-full bg-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
-          >
-            <div className="flex-1 w-0 p-4" style={{color: "#102530"}}>
-              <div className="flex items-start">
-                <div className="flex-shrink-0 pt-0.5">
-                  {/* <img
-                    className="h-10 w-10 rounded-full"
-                    src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixqx=6GHAjsWpt9&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2.2&w=160&h=160&q=80"
-                    alt=""
-                  /> */}
-                  <FiXCircle />
-                </div>
-                <div className="ml-3 flex-1">
-                  <p>Không thể kết nối đến máy chủ</p>
+        if(result.statusCode === 401) {
+          Logout();
+        } else {
+          toast.custom((t) => (
+            <div
+              className={`${
+                t.visible ? "animate-enter" : "animate-leave"
+              } max-w-md w-full bg-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
+            >
+              <div className="flex-1 w-0 p-4" style={{color: "#102530"}}>
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 pt-0.5">
+                    {/* <img
+                      className="h-10 w-10 rounded-full"
+                      src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixqx=6GHAjsWpt9&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2.2&w=160&h=160&q=80"
+                      alt=""
+                    /> */}
+                    <FiXCircle />
+                  </div>
+                  <div className="ml-3 flex-1">
+                    <p>Không thể kết nối đến máy chủ</p>
+                  </div>
                 </div>
               </div>
+              <div className="flex border-l border-gray-200">
+                <button
+                  onClick={() => toast.dismiss(t.id)}
+                  className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                  Đóng
+                </button>
+              </div>
             </div>
-            <div className="flex border-l border-gray-200">
-              <button
-                onClick={() => toast.dismiss(t.id)}
-                className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              >
-                Đóng
-              </button>
-            </div>
-          </div>
-        ))
+          ))
+        }
       } else {
         hasMoreRef.current = false; // Không còn bài viết để tải
       }

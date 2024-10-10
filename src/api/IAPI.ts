@@ -1,3 +1,3 @@
 interface ApiCall<TRequest, TResponse> {
-  (body: TRequest): Promise<{ isSuccess: boolean; res: TResponse | null }>;
+  (body: TRequest): Promise<{ isSuccess: boolean; res: TResponse | null; statusCode: number }>;
 };

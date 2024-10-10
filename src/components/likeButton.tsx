@@ -1,8 +1,9 @@
-import { CREATEFEELING } from "@/api/Feeling";
-import { CreateFeelingReq, FeelingGUI } from "@/interface/feeling";
+import { CREATEFEELING, UPDATEFEELING } from "@/api/Feeling";
+import { CreateFeelingReq, FeelingGUI, UpdateFeelingReq } from "@/interface/feeling";
 import EmojiPicker, { Emoji, EmojiClickData, EmojiStyle } from "emoji-picker-react";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { AiOutlineLike } from "react-icons/ai";
+import Logout from "./logout";
 
 interface LikeButtonProps {
     postId: string;
@@ -74,10 +75,67 @@ export const LikeButton: React.FC<LikeButtonProps> = ({
             if (result.isSuccess && result.res != null) {
                 return;
             } else {
-                console.log(result.res)
+                if(result.statusCode === 401) {
+                    Logout();
+                }
             }
         } catch(e) {
             console.log(e);
+        }
+    }
+
+    const UpdateFeeling = async (postId: string, typeReact?: string | null) => {
+        // Kiểm tra xem token có trong localStorage hay không
+        if (!localStorage.getItem('token')) {
+            return;
+        }
+    
+        try {
+            // Tạo yêu cầu (request) với postId và typeReact (undefined nếu không có giá trị)
+            const req: UpdateFeelingReq = {
+                postId: postId,
+                typeReact: typeReact || undefined,  // Thay null bằng undefined
+            };
+    
+            // Giả sử UPDATEFEELING là một hàm thực hiện gọi API
+            const result = await UPDATEFEELING({
+                FeelingReq: req,
+                token: localStorage.token, // Truyền token từ localStorage vào request
+            });
+    
+            // Kiểm tra kết quả trả về từ API
+            if (result.isSuccess && result.res !== null) {
+                console.log("Feeling updated successfully.");
+                return result.res; // Trả về kết quả nếu thành công
+            } else {
+                if(result.statusCode === 401) {
+                    Logout();
+                }
+            }
+        } catch (e) {
+            console.error("Error occurred while updating feeling:", e);
+        }
+    };
+
+    const likeButtonClick = async (postId: string) => {
+        if(emojiPost[postId] == null){
+            await CreateFeeling(postId, reactionEmojis[0])
+            var userReact: FeelingGUI = {
+                typeReact: reactionEmojis[0],
+                name: reactionEmojisString[
+                  reactionEmojis.indexOf(reactionEmojis[0])
+                ],
+            }
+            setEmojiPost((prev) => ({
+                ...prev,
+                [postId]: userReact, // Ensure value is either string or null
+            }));
+        } else {
+            await UpdateFeeling(postId, null)
+            setEmojiPost((prev) => ({
+                ...prev,
+                [postId]: null, // Ensure value is either string or null
+            }));
         }
     }
 
@@ -88,6 +146,8 @@ export const LikeButton: React.FC<LikeButtonProps> = ({
         // Ensure userFeeling is not undefined
         if(emojiPost[postId] == null){
             await CreateFeeling(postId, emojiData.unified)
+        } else {
+            await UpdateFeeling(postId, emojiData.unified)
         }
 
         var userReact: FeelingGUI = {
@@ -102,10 +162,6 @@ export const LikeButton: React.FC<LikeButtonProps> = ({
         }));
         setShowEmotions({});
     };
-
-    useEffect(() => {
-        console.log(emojiPost)
-    }, [])
     return(
         <>
             <div className="relative">
@@ -113,6 +169,7 @@ export const LikeButton: React.FC<LikeButtonProps> = ({
                     className={`flex flex-row items-center py-1 ${emojiPost[postId] ? emojiPost[postId].name.split(" ").length > 1 ? "px-10" : "px-11" : "px-12"} hover:bg-[#e5dfca] hover:text-[#102530] hover:rounded-md transition-all hover-div`}
                     onMouseEnter={() => handleMouseEnterLike(postId)}
                     onMouseLeave={() => handleMouseLeaveLike(postId)}
+                    onMouseDownCapture={() => likeButtonClick(postId)}
                 >
                     {emojiPost[postId] ? (
                         <>

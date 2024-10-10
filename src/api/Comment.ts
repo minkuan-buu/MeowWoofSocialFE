@@ -2,28 +2,30 @@ import { CreateCommentRes } from "@/interface/comment";
 import { API_URL } from "./Endpoint";
 
 export const CREATECOMMENT: ApiCall<
-  { CommentReq: FormData, token: string },
-  {
-    data: CreateCommentRes;
-  }
+  { CommentReq: FormData; token: string },
+  { data: CreateCommentRes }
 > = async (body) => {
-  try {
-    const res = await fetch(API_URL + `react/create-comment`, {
-      method: "POST",
-      headers: {
-        "Authorization": "Bearer " + body.token
-      },
-      body: body.CommentReq
-    });
+  const res = await fetch(API_URL + `react/create-comment`, {
+    method: "POST",
+    headers: {
+      "Authorization": "Bearer " + body.token,
+    },
+    body: body.CommentReq,
+  });
 
-    if (res.ok) {
-      const data = await res.json();
-      return { isSuccess: true, res: data }; // Trả về dữ liệu nếu thành công
-    } else {
-      const errorData = await res.json(); // Lấy chi tiết lỗi
-      return { isSuccess: false, res: errorData }; // Trả về lỗi từ server
-    }
+  try {
+    const data = await res.json();
+
+    return {
+      isSuccess: res.ok,
+      res: res.ok ? data : null,
+      statusCode: res.status,
+    };
   } catch (error) {
-    return { isSuccess: false, res: { message: "Network error" } }; // Lỗi mạng
+    return {
+      isSuccess: false,
+      res: null,
+      statusCode: 500, // Lỗi mạng
+    };
   }
 };

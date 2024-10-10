@@ -1,31 +1,63 @@
 
-import { CreateFeelingReq, CreateFeelingRes } from "@/interface/feeling";
+import { CreateFeelingReq, CreateFeelingRes, UpdateFeelingReq } from "@/interface/feeling";
 import { API_URL } from "./Endpoint";
 
 export const CREATEFEELING: ApiCall<
-  { FeelingReq: CreateFeelingReq, token: string },
-  {
-    data: CreateFeelingRes;
-  }
+  { FeelingReq: CreateFeelingReq; token: string },
+  { data: CreateFeelingRes }
 > = async (body) => {
-  try {
-    const res = await fetch(API_URL + `react/create-reaction`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + body.token
-      },
-      body: JSON.stringify(body.FeelingReq),
-    });
+  const res = await fetch(API_URL + `react/create-reaction`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + body.token,
+    },
+    body: JSON.stringify(body.FeelingReq),
+  });
 
-    if (res.ok) {
-      const data = await res.json();
-      return { isSuccess: true, res: data }; // Trả về dữ liệu nếu thành công
-    } else {
-      const errorData = await res.json(); // Lấy chi tiết lỗi
-      return { isSuccess: false, res: errorData }; // Trả về lỗi từ server
-    }
+  try {
+    const data = await res.json();
+
+    return {
+      isSuccess: res.ok,
+      res: res.ok ? data : null,
+      statusCode: res.status,
+    };
   } catch (error) {
-    return { isSuccess: false, res: { message: "Network error" } }; // Lỗi mạng
+    return {
+      isSuccess: false,
+      res: null,
+      statusCode: 500, // Lỗi mạng
+    };
+  }
+};
+
+export const UPDATEFEELING: ApiCall<
+  { FeelingReq: UpdateFeelingReq; token: string },
+  { data: CreateFeelingRes | { message: string } }
+> = async (body) => {
+  const res = await fetch(API_URL + `react/update-reaction`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + body.token,
+    },
+    body: JSON.stringify(body.FeelingReq),
+  });
+
+  try {
+    const data = await res.json();
+
+    return {
+      isSuccess: res.ok,
+      res: res.ok ? data : null,
+      statusCode: res.status,
+    };
+  } catch (error) {
+    return {
+      isSuccess: false,
+      res: null,
+      statusCode: 500, // Lỗi mạng
+    };
   }
 };

@@ -15,6 +15,11 @@ export interface CreateFeelingReq{
     typeReact: string;
 }
 
+export interface UpdateFeelingReq{
+    postId: string;
+    typeReact?: string;
+}
+
 export interface FeelingGUI {
     typeReact: string,
     name: string
