@@ -1,4 +1,4 @@
-import { Post } from "@/interface/post";
+import { DeletePost, Post } from "@/interface/post";
 import { API_URL } from "./Endpoint";
 
 export const NEWSFEED: ApiCall<
@@ -63,3 +63,61 @@ export const CREATEPOST: ApiCall<
   }
 };
 
+export const UPDATEPOST: ApiCall<
+  { CreateReq: FormData; token: string },
+  { data: Post }
+> = async (body) => {
+  const res = await fetch(API_URL + `posts/update-post`, {
+    method: "PUT",
+    headers: {
+      "Authorization": "Bearer " + body.token,
+    },
+    body: body.CreateReq,
+  });
+
+  try {
+    const data = await res.json();
+    
+    return {
+      isSuccess: res.ok,
+      res: res.ok ? data : null,
+      statusCode: res.status,
+    };
+  } catch (error) {
+    return {
+      isSuccess: false,
+      res: null,
+      statusCode: 500, // Mã trạng thái lỗi mạng
+    };
+  }
+};
+
+export const DELETEPOST: ApiCall<
+  { DeleteReq: DeletePost; token: string },
+  { message: string }
+> = async (body) => {
+  const res = await fetch(API_URL + `posts/delete-post`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + body.token,
+    },
+    body: JSON.stringify(body.DeleteReq),
+  });
+
+  try {
+    const data = await res.json();
+    
+    return {
+      isSuccess: res.ok,
+      res: res.ok ? data : null,
+      statusCode: res.status,
+    };
+  } catch (error) {
+    return {
+      isSuccess: false,
+      res: null,
+      statusCode: 500, // Mã trạng thái lỗi mạng
+    };
+  }
+};

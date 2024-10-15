@@ -39,4 +39,7 @@ export interface Post {
   createAt: Date; // Updated field name
   updatedAt: Date;
 }
-  
+
+export interface DeletePostReq {
+  postId: string;
+}

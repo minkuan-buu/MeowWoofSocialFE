@@ -20,7 +20,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { FiXCircle } from "react-icons/fi";
 import EmojiPicker, { EmojiClickData, EmojiStyle } from 'emoji-picker-react';
 import { CustomEmoji } from "emoji-picker-react/dist/config/customEmojiConfig";
-import { CreatePost, PostDetailPopup } from "@/components/post";
+import { CreatePost, DeletePost, PostDetailPopup, UpdatePost } from "@/components/post";
 import { Post } from "@/interface/post";
 import { ShareModal } from "@/components/share";
 import { IoSend, IoWarningOutline } from "react-icons/io5";
@@ -80,12 +80,22 @@ interface newFeedPost{
 
 const PostCard: React.FC<{ post: Post, emojiPost: {[key: string]: FeelingGUI | null}, setEmojiPost: Dispatch<SetStateAction<{
   [key: string]: FeelingGUI | null;
-}>> }> = ({ post, emojiPost, setEmojiPost }) => {
+}>>, setPosts: Dispatch<SetStateAction<Post[]>> }> = ({ post, emojiPost, setEmojiPost, setPosts }) => {
   const { isOpen: isOpenPostPopup, onOpen: onOpenPostPopup, onOpenChange: onOpenChangePostPopup } = useDisclosure();
   const {
     isOpen: isOpenShare,
     onOpen: onOpenShare,
     onOpenChange: onOpenChangeShare,
+  } = useDisclosure();
+  const {
+    isOpen: isOpenDeletePost,
+    onOpen: onOpenDeletePost,
+    onOpenChange: onOpenChangeDeletePost,
+  } = useDisclosure();
+  const {
+    isOpen: isOpenUpdatePost,
+    onOpen: onOpenUpdatePost,
+    onOpenChange: onOpenChangeUpdatePost,
   } = useDisclosure();
   const [sharePostId, setSharePostId] = useState<string>("");
   const Share = (postId: string) => {
@@ -112,6 +122,8 @@ const PostCard: React.FC<{ post: Post, emojiPost: {[key: string]: FeelingGUI | n
                 </span>
               </div>
             </div>
+            <UpdatePost isOpen={isOpenUpdatePost} onOpenChange={onOpenChangeUpdatePost} setPosts={setPosts} currentPost={post}/>
+            <DeletePost isOpen={isOpenDeletePost} onOpenChange={onOpenChangeDeletePost} currentPost={post} setPosts={setPosts}/>
             <Dropdown>
               <DropdownTrigger>
               <Button className="!w-10 !h-10 !min-w-0 !p-0 bg-transparent hover:bg-gray-400 !rounded-full transition-all duration-300 flex items-center justify-center">
@@ -129,6 +141,7 @@ const PostCard: React.FC<{ post: Post, emojiPost: {[key: string]: FeelingGUI | n
                   <DropdownItem
                     key="edit"
                     startContent={<MdEdit />}
+                    onAction={onOpenUpdatePost}
                   >
                     Chỉnh sửa bài viết
                   </DropdownItem>
@@ -137,6 +150,7 @@ const PostCard: React.FC<{ post: Post, emojiPost: {[key: string]: FeelingGUI | n
                     className="text-danger"
                     color="danger"
                     startContent={<MdDelete />}
+                    onAction={onOpenDeletePost}
                   >
                     Xóa bài viết
                   </DropdownItem>
@@ -872,7 +886,7 @@ export default function IndexPage() {
                   </CardBody>
                 </Card>
                 {posts.map((post: Post, index: number) => (
-                  <PostCard key={post.id} post={post} emojiPost={emojiPost} setEmojiPost={setEmojiPost} />
+                  <PostCard key={post.id} post={post} emojiPost={emojiPost} setEmojiPost={setEmojiPost} setPosts={setPosts}/>
                 ))}
                 {isLoading ? (
                   <div className="flex justify-center">
