@@ -13,7 +13,7 @@ This is a platform social for pet lovers using Vite and NextUI (v2).
 
 ## How to Use
 
-[Try our social on this website](https://meoowoofsocial.com)
+[Try our social on this website](https://meowwoofsocial.com)
 
 ## License
 
