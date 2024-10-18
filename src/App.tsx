@@ -3,7 +3,7 @@ import { Route, Routes } from "react-router-dom";
 import IndexPage from "@/pages/index";
 import DocsPage from "@/pages/authentication-page";
 import PricingPage from "@/pages/pricing";
-import BlogPage from "@/pages/blog";
+import { ImageViewPage } from "@/pages/ImageViewPage";
 import AboutPage from "@/pages/about";
 
 function App() {
@@ -12,7 +12,7 @@ function App() {
       <Route element={<IndexPage />} path="/" />
       <Route element={<DocsPage />} path="/authentication" />
       <Route element={<PricingPage />} path="/pricing" />
-      <Route element={<BlogPage />} path="/blog" />
+      <Route element={<ImageViewPage />} path="/post/:postId/attachment/:attachmentId" />
       <Route element={<AboutPage />} path="/about" />
     </Routes>
   );

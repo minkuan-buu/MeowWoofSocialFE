@@ -62,7 +62,7 @@ export const Navbar = () => {
             href="/"
           >
             {/* <Logo /> */}
-            <img src="tab-logo.svg" className="mr-4" alt="SVG Icon" width={50} height={50} />
+            <img src={`${import.meta.env.BASE_URL}tab-logo.svg`} className="mr-4" alt="SVG Icon" width={50} height={50} />
             <p className="font-bold text-inherit">MeowWoofSocial</p>
           </Link>
         </NavbarBrand>

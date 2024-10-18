@@ -1,0 +1,64 @@
+.slider {
+    position: relative;
+    overflow: hidden;
+}
+  
+.image-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+  
+.slider-image {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+  
+.prev-button, .next-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    font-size: 20px;
+    z-index: 1; /* Ensure the buttons appear on top of the image */
+}
+  
+.prev-button {
+    border-radius: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    left: 10px;
+}
+  
+.next-button {
+    border-radius: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    right: 10px;
+}
+  
+/* Optional: Style for indicators */
+.indicators {
+    text-align: center;
+    margin-top: 10px;
+}
+  
+.indicators span {
+    padding: 5px;
+    cursor: pointer;
+}
+  
+.indicators .active {
+    font-weight: bold;
+}
+  

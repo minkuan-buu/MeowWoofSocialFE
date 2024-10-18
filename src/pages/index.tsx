@@ -102,6 +102,10 @@ const PostCard: React.FC<{ post: Post, emojiPost: {[key: string]: FeelingGUI | n
     setSharePostId(postId);
     onOpenShare();
   }
+  const redirectImageView = (postId: string, attachmentId: string) => {
+    window.location.href = `/post/${postId}/attachment/${attachmentId}`;
+  }
+
   return (
     <Card key={post.id}>
       <CardBody>
@@ -180,13 +184,13 @@ const PostCard: React.FC<{ post: Post, emojiPost: {[key: string]: FeelingGUI | n
           {/* Attachments */}
           {post.attachments.length > 0 && (
             <div className="flex flex-col">
-              <Image src={`${post.attachments[0].attachment}`} alt="" className="w-full h-auto" />
+              <Image src={`${post.attachments[0].attachment}`} alt="" className="w-full h-auto cursor-pointer" onMouseDownCapture={() => redirectImageView(post.id, post.attachments[0].id)}/>
 
               {/* Render thêm hình ảnh như hình vuông nhỏ bên dưới hình ảnh đầu tiên */}
               {post.attachments.length > 0 && (
               <div className="grid grid-cols-3 gap-2 mt-2">
                 {post.attachments.length > 1 && (
-                  <div className="relative">
+                  <div className="relative cursor-pointer" onMouseDownCapture={() => redirectImageView(post.id, post.attachments[1].id)}>
                     <img
                       src={post.attachments[1].attachment}
                       alt=""
@@ -197,7 +201,7 @@ const PostCard: React.FC<{ post: Post, emojiPost: {[key: string]: FeelingGUI | n
 
                 {/* Hình ảnh thứ hai */}
                 {post.attachments.length > 2 && (
-                  <div className="relative">
+                  <div className="relative cursor-pointer" onMouseDownCapture={() => redirectImageView(post.id, post.attachments[2].id)}>
                     <img
                       src={post.attachments[2].attachment}
                       alt=""
@@ -208,7 +212,7 @@ const PostCard: React.FC<{ post: Post, emojiPost: {[key: string]: FeelingGUI | n
 
                 {/* Hình ảnh thứ ba với số lượng hình ảnh còn lại */}
                 {post.attachments.length > 3 && (
-                  <div className="relative">
+                  <div className="relative cursor-pointer" onMouseDownCapture={() => redirectImageView(post.id, post.attachments[3].id)}>
                     <img
                       src={post.attachments[3].attachment} // Hiển thị hình thứ 3
                       alt={`third-${2}`}
@@ -874,7 +878,7 @@ export default function IndexPage() {
                     <Button
                       className="status-bar select-none"
                       onPress={onOpenCreatePost}
-                      color="#e5dfca"
+                      style={{ backgroundColor: "#e5dfca" }}
                     >
                         <span className="status-icon">😊</span>
                         <span className="status-text">

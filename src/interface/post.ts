@@ -43,3 +43,8 @@ export interface Post {
 export interface DeletePostReq {
   postId: string;
 }
+
+export interface PostAttachment {
+  id: string;
+  attachment: string;
+}
