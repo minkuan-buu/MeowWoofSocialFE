@@ -1,8 +1,6 @@
-# Vite & NextUI Template
+# MeooWoofSocial - Vite & NextUI 
 
-This is a template for creating applications using Vite and NextUI (v2).
-
-[Try it on CodeSandbox](https://githubbox.com/nextui-org/vite-template)
+This is a platform social for pet lovers using Vite and NextUI (v2).
 
 ## Technologies Used
 
@@ -15,35 +13,37 @@ This is a template for creating applications using Vite and NextUI (v2).
 
 ## How to Use
 
-To clone the project, run the following command:
+[Try our social on this website](https://meoowoofsocial.com)
 
-```bash
-git clone https://github.com/nextui-org/vite-template.git
-```
+### To clone the project, run the following command:
+
+### ```bash
+### git clone https://github.com/nextui-org/vite-template.git
+### ```
 
 ### Install dependencies
 
 You can use one of them `npm`, `yarn`, `pnpm`, `bun`, Example using `npm`:
 
-```bash
-npm install
-```
+### ```bash
+### npm install
+### ```
 
 ### Run the development server
 
-```bash
-npm run dev
-```
+### ```bash
+### npm run dev
+### ```
 
 ### Setup pnpm (optional)
 
-If you are using `pnpm`, you need to add the following code to your `.npmrc` file:
+### If you are using `pnpm`, you need to add the following code to your `.npmrc` file:
 
-```bash
-public-hoist-pattern[]=*@nextui-org/*
-```
+### ```bash
+### public-hoist-pattern[]=*@nextui-org/*
+### ```
 
-After modifying the `.npmrc` file, you need to run `pnpm install` again to ensure that the dependencies are installed correctly.
+### After modifying the `.npmrc` file, you need to run `pnpm install` again to ensure that the dependencies are installed correctly.
 
 ## License
 
