@@ -1,1 +1,1 @@
-export const API_URL = "https://api.meowwoofsocial.com:7065/api/";
+export const API_URL = "https://api.meowwoofsocial.com/api/";
