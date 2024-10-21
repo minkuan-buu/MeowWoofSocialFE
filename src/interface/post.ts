@@ -4,6 +4,7 @@ export interface Post {
     id: string;
     name: string;
     avatar: string;
+    isFollow: boolean;
   };
   content: string;
   attachments: {

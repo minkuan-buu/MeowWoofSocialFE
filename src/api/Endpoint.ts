@@ -1,1 +1,1 @@
-export const API_URL = "https://api.meowwoofsocial.com/api/";
+export const API_URL = "https://localhost:7065/api/";

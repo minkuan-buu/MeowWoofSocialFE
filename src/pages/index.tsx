@@ -81,7 +81,45 @@ interface newFeedPost{
 const PostCard: React.FC<{ post: Post, emojiPost: {[key: string]: FeelingGUI | null}, setEmojiPost: Dispatch<SetStateAction<{
   [key: string]: FeelingGUI | null;
 }>>, setPosts: Dispatch<SetStateAction<Post[]>> }> = ({ post, emojiPost, setEmojiPost, setPosts }) => {
+  const [showInfomations, setShowInfomations] = useState<{ [key: string]: boolean }>({}); // Trạng thái cho từng bài viết
+  const hoverTimeoutRefs = useRef<{ [key: string]: number | null }>({}); // Timeout cho từng bài viết
+  const closeTimeoutRefs = useRef<{ [key: string]: number | null }>({}); // Timeout đóng cho từng bài viết
   const { isOpen: isOpenPostPopup, onOpen: onOpenPostPopup, onOpenChange: onOpenChangePostPopup } = useDisclosure();
+
+  const handleMouseEnterName = (postId: string) => {
+    // Khi chuột hover vào nút "Thích"
+    hoverTimeoutRefs.current[postId] = window.setTimeout(() => {
+      setShowInfomations((prev) => ({ ...prev, [postId]: true }));
+    }, 500); // 1 giây
+  };
+
+  const handleMouseLeaveName = (postId: string) => {
+    // Khi chuột rời khỏi nút "Thích"
+    if (hoverTimeoutRefs.current[postId]) {
+      clearTimeout(hoverTimeoutRefs.current[postId]);
+      hoverTimeoutRefs.current[postId] = null;
+    }
+
+    // Đóng thanh cảm xúc sau 3 giây
+    closeTimeoutRefs.current[postId] = window.setTimeout(() => {
+      setShowInfomations((prev) => ({ ...prev, [postId]: false }));
+    }, 1000); // 3 giây
+  };
+
+  const handleMouseEnterInformation = (postId: string) => {
+    // Khi chuột hover vào thanh cảm xúc
+    if (closeTimeoutRefs.current[postId]) {
+      clearTimeout(closeTimeoutRefs.current[postId]);
+      closeTimeoutRefs.current[postId] = null;
+    }
+  };
+
+  const handleMouseLeaveInformation = (postId: string) => {
+    // Khi chuột rời khỏi thanh cảm xúc
+    closeTimeoutRefs.current[postId] = window.setTimeout(() => {
+      setShowInfomations((prev) => ({ ...prev, [postId]: false }));
+    }, 100); // 3 giây
+  };
   const {
     isOpen: isOpenShare,
     onOpen: onOpenShare,
@@ -105,6 +143,9 @@ const PostCard: React.FC<{ post: Post, emojiPost: {[key: string]: FeelingGUI | n
   const redirectImageView = (postId: string, attachmentId: string) => {
     window.location.href = `/post/${postId}/attachment/${attachmentId}`;
   }
+  const redirectProfile = (userId: string) => {
+    window.location.href = `/user/${userId}`;
+  }
 
   return (
     <Card key={post.id}>
@@ -119,7 +160,49 @@ const PostCard: React.FC<{ post: Post, emojiPost: {[key: string]: FeelingGUI | n
                 src={post.author.avatar || undefined}
               />
               <div className="flex flex-col">
-                <span className="ml-2">{post.author.name}</span>
+                <div className="relative">
+                  <div
+                    className="ml-2 cursor-pointer"
+                    onMouseEnter={() => handleMouseEnterName(post.id)}
+                    onMouseLeave={() => handleMouseLeaveName(post.id)}
+                    onMouseDownCapture={() => redirectProfile(post.author.id)}
+                  >
+                    {post.author.name}
+                  </div>
+                  {/* Bản chọn cảm xúc */}
+                  {showInfomations[post.id] && (
+                    <div
+                      className={`absolute min-w-[300px] border-[#e5dfca] border-1 rounded-xl transition-opacity duration-700 ease-in-out ${showInfomations[post.id] ? "translate-x-0 opacity-100" : "translate-x-0 opacity-0"}`}
+                      style={{ zIndex: 999 }}
+                      onMouseEnter={() => handleMouseEnterInformation(post.id)}
+                      onMouseLeave={() => handleMouseLeaveInformation(post.id)}
+                    >
+                      <Card>
+                        <CardBody>
+                          <div className="flex flex-col gap-2">
+                            <div className="flex items-center gap-2">
+                              <Avatar
+                                className="w-20 h-20 text-large"
+                                name={post.author.name}
+                                size="lg"
+                                src={post.author.avatar || undefined}
+                              />
+                              <div className="flex flex-col items-center">
+                                <div>{post.author.name}</div>
+                              </div>
+                            </div>
+                            <Divider />
+                            <Button color="primary" as={Link} href={`/user/${post.author.id}`}>
+                              Xem trang cá nhân
+                            </Button>
+                            <div className="flex flex-col gap-2">
+                            </div>
+                          </div>
+                        </CardBody>
+                      </Card>
+                    </div>
+                  )}
+                </div>
                 <span className="ml-2 text-xs text-gray-400">
                   {/* Replace this with your time calculation */}
                   {calculateTimeDifference(post.createAt)}
@@ -497,16 +580,17 @@ export default function IndexPage() {
   const lastPostIdRef = useRef<string | null>(null); // Sử dụng useRef để lưu lastPostId
   const hasMoreRef = useRef<boolean>(true); // Sử dụng useRef để lưu trạng thái hasMore
   const loadedPostsRef = useRef<Set<string>>(new Set()); // Lưu các ID bài viết đã tải
+  const loadedPosts = useRef<number>(0); // Số lượng bài viết đã tải
 
   // Fetch posts from API
   const fetchPosts = async (lastPostId: string | null) => {
     if (isLoading || !hasMoreRef.current || !localStorage.token) return; // Tránh nhiều yêu cầu cùng lúc
     setIsLoading(true);
-
     try {
       const result = await NEWSFEED({
         PageSize: pageSize,
         lastPostId: lastPostId || '',
+        loadedPosts: loadedPosts.current,
         token: localStorage.token,
       });
 
@@ -544,6 +628,11 @@ export default function IndexPage() {
                 ...prev,
                 [post.id]: userReact || null, // Ensure value is either string or null
               }));
+            }
+          });
+          filteredPosts.forEach((post) => {
+            if(!post.author.isFollow){
+              loadedPosts.current += 1;
             }
           });
         }
@@ -861,97 +950,97 @@ export default function IndexPage() {
           />
           <ShareModal isOpen={isOpenShare} onOpenChange={onOpenChangeShare} postId={sharePostId}/>
           {/* <section className="flex-1 bg-[#e5dfca]"> */}
-            <div className="flex justify-center pt-5 pb-20">
-              <div className="flex flex-col gap-4 w-[600px] h-full">
-                <Card className="py-2">
-                  <CardBody>
-                    <div className="flex items-center justify-center">
-                      <Avatar
-                        className="avatar-size select-none" // Thêm class cho Avatar
-                        name={
-                          localStorage.getItem("avatar")
-                            ? undefined
-                            : localStorage.getItem("name") || undefined
-                        }
-                        src={localStorage.getItem("avatar") || undefined}
-                      />
-                    <Button
-                      className="status-bar select-none"
-                      onPress={onOpenCreatePost}
-                      style={{ backgroundColor: "#e5dfca" }}
-                    >
-                        <span className="status-icon">😊</span>
-                        <span className="status-text">
-                          {localStorage.getItem("name")} ơi, bạn đang nghĩ gì
-                          thế?
-                        </span>
-                      </Button>
-                    </div>
-                  </CardBody>
-                </Card>
-                {posts.map((post: Post, index: number) => (
-                  <PostCard key={post.id} post={post} emojiPost={emojiPost} setEmojiPost={setEmojiPost} setPosts={setPosts}/>
-                ))}
-                {isLoading ? (
-                  <div className="flex justify-center">
-                    <ThreeDot color="#102530" size="medium" text="" textColor="" />
+          <div className="flex justify-center pt-5 pb-20">
+            <div className="flex flex-col gap-4 w-[600px] h-full">
+              <Card className="py-2">
+                <CardBody>
+                  <div className="flex items-center justify-center">
+                    <Avatar
+                      className="avatar-size select-none" // Thêm class cho Avatar
+                      name={
+                        localStorage.getItem("avatar")
+                          ? undefined
+                          : localStorage.getItem("name") || undefined
+                      }
+                      src={localStorage.getItem("avatar") || undefined}
+                    />
+                  <Button
+                    className="status-bar select-none"
+                    onPress={onOpenCreatePost}
+                    style={{ backgroundColor: "#e5dfca" }}
+                  >
+                      <span className="status-icon">😊</span>
+                      <span className="status-text">
+                        {localStorage.getItem("name")} ơi, bạn đang nghĩ gì
+                        thế?
+                      </span>
+                    </Button>
                   </div>
-                ) : null}
-                {!hasMoreRef.current ? (
-                   <div className="flex justify-center text-[#102530]">
-                      Không còn nội dung nào
-                  </div>
-                ) : null}
-                {/* <Card>
-                  <CardBody>
-                    <div className="flex flex-col gap-4">
-                      <div className="flex justify-between">
-                        <div className="flex items-start justify-start">
-                          <Avatar
-                            className="avatar-size"  // Thêm class cho Avatar
-                            name={
-                              localStorage.getItem("avatar")
-                                ? undefined
-                                : localStorage.getItem("name") || undefined
-                            }
-                            src={localStorage.getItem("avatar") || undefined}
-                          />
-                          <div className="flex flex-col">
-                            <span className="ml-2">Name</span>
-                            <span className="ml-2 text-xs text-gray-400">
-                              CreatedAt
-                            </span>
-                          </div>
+                </CardBody>
+              </Card>
+              {posts.map((post: Post, index: number) => (
+                <PostCard key={post.id} post={post} emojiPost={emojiPost} setEmojiPost={setEmojiPost} setPosts={setPosts}/>
+              ))}
+              {isLoading ? (
+                <div className="flex justify-center">
+                  <ThreeDot color="#102530" size="medium" text="" textColor="" />
+                </div>
+              ) : null}
+              {!hasMoreRef.current ? (
+                  <div className="flex justify-center text-[#102530]">
+                    Không còn nội dung nào
+                </div>
+              ) : null}
+              {/* <Card>
+                <CardBody>
+                  <div className="flex flex-col gap-4">
+                    <div className="flex justify-between">
+                      <div className="flex items-start justify-start">
+                        <Avatar
+                          className="avatar-size"  // Thêm class cho Avatar
+                          name={
+                            localStorage.getItem("avatar")
+                              ? undefined
+                              : localStorage.getItem("name") || undefined
+                          }
+                          src={localStorage.getItem("avatar") || undefined}
+                        />
+                        <div className="flex flex-col">
+                          <span className="ml-2">Name</span>
+                          <span className="ml-2 text-xs text-gray-400">
+                            CreatedAt
+                          </span>
                         </div>
-                        <TbDotsVertical />
                       </div>
-                      <div className="">Nội dung ở đây</div>
-                      <img src="dog-cat-sit.jpg" alt="" />
+                      <TbDotsVertical />
+                    </div>
+                    <div className="">Nội dung ở đây</div>
+                    <img src="dog-cat-sit.jpg" alt="" />
+                    <hr />
+                    <div className="flex flex-row w-full">
+                      <div className="flex flex-row items-center px-12">
+                        <AiOutlineLike />
+                        <span className="ml-2 select-none">Thích</span>
+                      </div>
                       <hr />
-                      <div className="flex flex-row w-full">
-                        <div className="flex flex-row items-center px-12">
-                          <AiOutlineLike />
-                          <span className="ml-2 select-none">Thích</span>
-                        </div>
-                        <hr />
-                        <hr className="vertical-hr bg-gray-50" />
-                        <div className="flex flex-row items-center px-12">
-                          <FaRegCommentAlt />
-                          <span className="ml-2 select-none">Bình luận</span>
-                        </div>
-                        <hr />
-                        <hr className="vertical-hr bg-gray-50" />
-                        <div className="flex flex-row items-center px-12">
-                          <FaShareSquare />
-                          <span className="ml-2 select-none">Chia sẻ</span>
-                        </div>
-                        <hr />
+                      <hr className="vertical-hr bg-gray-50" />
+                      <div className="flex flex-row items-center px-12">
+                        <FaRegCommentAlt />
+                        <span className="ml-2 select-none">Bình luận</span>
                       </div>
+                      <hr />
+                      <hr className="vertical-hr bg-gray-50" />
+                      <div className="flex flex-row items-center px-12">
+                        <FaShareSquare />
+                        <span className="ml-2 select-none">Chia sẻ</span>
+                      </div>
+                      <hr />
                     </div>
-                  </CardBody>
-                </Card> */}
-              </div>
+                  </div>
+                </CardBody>
+              </Card> */}
             </div>
+          </div>
           {/* </section> */}
         </NonFooterLayout>
       )}

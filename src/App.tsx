@@ -4,7 +4,7 @@ import IndexPage from "@/pages/index";
 import DocsPage from "@/pages/authentication-page";
 import PricingPage from "@/pages/pricing";
 import { ImageViewPage } from "@/pages/ImageViewPage";
-import AboutPage from "@/pages/about";
+import UserInfo from "@/pages/userProfile";
 
 function App() {
   return (
@@ -13,7 +13,7 @@ function App() {
       <Route element={<DocsPage />} path="/authentication" />
       <Route element={<PricingPage />} path="/pricing" />
       <Route element={<ImageViewPage />} path="/post/:postId/attachment/:attachmentId" />
-      <Route element={<AboutPage />} path="/about" />
+      <Route element={<UserInfo />} path="/user/:userId" />
     </Routes>
   );
 }
