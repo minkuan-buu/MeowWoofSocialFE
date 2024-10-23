@@ -813,9 +813,9 @@ export default function IndexPage() {
                 minHeight: "105vh",
               }}
             >
-              <div className="flex justify-between gap-x-96">
-                <div className="font-literata font-bold sm:pr-96 sm:pl-10">
-                  <div className="text-5xl">
+              <div className="flex flex-col lg:flex-row justify-between gap-8 lg:gap-96">
+                <div className="font-literata font-bold sm:pr-10 sm:pl-10 lg:pr-96 lg:pl-10">
+                  <div className="text-3xl lg:text-5xl">
                     <span style={{ color: "#102530" }}>Nền tảng xã hội cho</span>
                     <br />
                     <span style={{ color: "#ed5c02" }}>người yêu chó mèo</span>
@@ -824,7 +824,7 @@ export default function IndexPage() {
                   <br />
                   <div className="mt-6">
                     <div className="flex">
-                    <span
+                      <span
                         className="inline-block"
                         style={{
                           width: "50px",
@@ -834,7 +834,7 @@ export default function IndexPage() {
                           backgroundRepeat: "no-repeat",
                         }}
                       />
-                      <span className="text-xl" style={{ color: "#102530" }}>
+                      <span className="text-lg lg:text-xl" style={{ color: "#102530" }}>
                         Giao lưu, chia sẻ khoảnh khắc đáng yêu của thú cưng
                       </span>
                     </div>
@@ -849,7 +849,7 @@ export default function IndexPage() {
                           backgroundRepeat: "no-repeat",
                         }}
                       />
-                      <span className="text-xl" style={{ color: "#102530" }}>
+                      <span className="text-lg lg:text-xl" style={{ color: "#102530" }}>
                         Đặt hàng và dịch vụ chăm sóc
                       </span>
                     </div>
@@ -864,7 +864,7 @@ export default function IndexPage() {
                           backgroundRepeat: "no-repeat",
                         }}
                       />
-                      <span className="text-xl" style={{ color: "#102530" }}>
+                      <span className="text-lg lg:text-xl" style={{ color: "#102530" }}>
                         Tham gia các sự kiện lớn nhỏ
                       </span>
                     </div>

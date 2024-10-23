@@ -16,3 +16,9 @@ export interface UserProfilePage {
     avatar: string;
   }[];
 };
+
+export interface UserBasicModel {
+  id: string;
+  name: string;
+  avatar: string;
+};

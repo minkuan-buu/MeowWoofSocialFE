@@ -9,11 +9,11 @@ import { title } from "@/components/primitives";
 import { ShareModal } from "@/components/share";
 import { FeelingGUI } from "@/interface/feeling";
 import { Post } from "@/interface/post";
-import { UserProfilePage } from "@/interface/user";
+import { UserBasicModel, UserProfilePage } from "@/interface/user";
 import NonFooterLayout from "@/layouts/non-footer";
 import { Button } from "@nextui-org/button";
 import { Link, LinkIcon } from "@nextui-org/link";
-import { Avatar, Card, CardBody, CardHeader, Divider, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Image, Skeleton, useDisclosure } from "@nextui-org/react";
+import { Avatar, Card, CardBody, CardHeader, Divider, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Image, Modal, Skeleton, useDisclosure } from "@nextui-org/react";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { FaRegBookmark, FaRegCommentAlt, FaShareSquare } from "react-icons/fa";
@@ -24,6 +24,7 @@ import { MdDelete, MdEdit } from "react-icons/md";
 import { ThreeDot } from "react-loading-indicators";
 import { useParams } from "react-router-dom";
 import { format } from "date-fns";
+import { ModalBasicUser } from "@/components/ModalUser";
 
 const PostCard: React.FC<{ post: Post, emojiPost: {[key: string]: FeelingGUI | null}, setEmojiPost: Dispatch<SetStateAction<{
   [key: string]: FeelingGUI | null;
@@ -375,6 +376,9 @@ export default function UserInfo() {
   const reactionEmojisString = ['Thích','Yêu thích','Haha','Wow','Buồn','Phẫn nộ'];
   const [emojiPost, setEmojiPost] = useState<{ [key: string]: FeelingGUI | null }>({});
   const [currentUser, setCurrentUser] = useState<UserProfilePage>();
+  const {isOpen: isOpenModelUser, onOpen: onOpenModelUser, onOpenChange: onOpenChangeModelUser} = useDisclosure();
+  const [followingUserList, setFollowingUserList] = useState<UserBasicModel[]>([]);
+  const [followerUserList, setFollowerUserList] = useState<UserBasicModel[]>([]);
 
   // Fetch posts from API
   const fetchPosts = async (lastPostId: string | null) => {
@@ -580,6 +584,34 @@ export default function UserInfo() {
     };
   }, []);
 
+  function handleFollowing() {
+    var followingUserList: UserBasicModel[] = [];
+
+    currentUser?.following.forEach((following) => {
+      followingUserList.push({
+        id: following.id,
+        name: following.name,
+        avatar: following.avatar,
+      });
+    });
+    setFollowingUserList(followingUserList);
+    onOpenModelUser();
+  }
+
+  function handleFollower() {
+    var followerUserList: UserBasicModel[] = [];
+
+    currentUser?.follower.forEach((follower) => {
+      followerUserList.push({
+        id: follower.id,
+        name: follower.name,
+        avatar: follower.avatar,
+      });
+    });
+    setFollowerUserList(followerUserList);
+    onOpenModelUser();
+  }
+
   return (
     <NonFooterLayout>
       <div className="flex justify-center pt-5 pb-20">
@@ -588,38 +620,60 @@ export default function UserInfo() {
             <CardBody>
               <div className="flex flex-col gap-4">
                 <div className="flex items-center gap-5">
-                <Skeleton
-                  className="flex rounded-full w-36 h-36"
-                  isLoaded={!isLoadingProfile}
-                >
-                  {currentUser && (
-                    <Avatar
-                      className="w-36 h-36 text-large"
-                      name={currentUser.name}
-                      size="lg"
-                      src={currentUser.avatar}
-                    />
-                  )}
-                </Skeleton>
+                  <Skeleton
+                    className="flex rounded-full w-36 h-36"
+                    isLoaded={!isLoadingProfile}
+                  >
+                    {currentUser && (
+                      <Avatar
+                        className="w-36 h-36 text-large"
+                        name={currentUser.name}
+                        size="lg"
+                        src={currentUser.avatar}
+                      />
+                    )}
+                  </Skeleton>
                   <div className="flex flex-col gap-2">
                     <Skeleton isLoaded={!isLoadingProfile} className="w-4/5 rounded-lg">
                       <div className="text-2xl">{currentUser && currentUser.name}</div>
                     </Skeleton>
-                    <div className="text-sm flex flex-row min-w-[300px]">
+                    <div className="text-sm min-w-[300px]">
                       <Skeleton isLoaded={!isLoadingProfile} className="rounded-lg">
-                        {currentUser?.following.length} Đang theo dõi
-                      </Skeleton> 
-                      <span className="px-1"> • </span>
-                      <Skeleton isLoaded={!isLoadingProfile} className="rounded-lg">
-                        {currentUser?.follower.length} Người theo dõi
+                        {!isLoadingProfile && currentUser ? (
+                          <>
+                            <ModalBasicUser isOpen={isOpenModelUser} onOpenChange={onOpenChangeModelUser} ListUser={followingUserList} Header="Đang theo dõi"/>
+                            <div
+                              className="cursor-pointer inline-block hover:text-gray-400"
+                              onMouseDownCapture={() => handleFollowing()}
+                            >
+                              {`${currentUser?.following.length} Đang theo dõi`}
+                            </div>
+                            <span className="px-1 inline-block"> • </span>
+                            <ModalBasicUser isOpen={isOpenModelUser} onOpenChange={onOpenChangeModelUser} ListUser={followerUserList} Header="Người theo dõi"/>
+                            <div
+                              className="cursor-pointer inline-block hover:text-gray-400"
+                              onMouseDownCapture={() => handleFollower()}
+                            >
+                              {`${currentUser?.follower.length} Người theo dõi`}
+                            </div>
+                          </>
+                        ) : null}
                       </Skeleton>
                     </div>
                   </div>
                 </div>
-                {currentUser?.isFollow ? (
-                  <Button disabled={isLoadingProfile}>Bỏ theo dõi</Button>
+                {currentUser?.id === localStorage.getItem("id") ? (
+                  <>
+                    <Button disabled={isLoadingProfile} startContent={<MdEdit />}>Chỉnh sửa thông tin</Button>
+                  </>
                 ) : (
-                  <Button color="primary" disabled={isLoadingProfile}>Theo dõi</Button>
+                  <>
+                    {currentUser?.isFollow ? (
+                      <Button disabled={isLoadingProfile}>Bỏ theo dõi</Button>
+                    ) : (
+                      <Button color="primary" disabled={isLoadingProfile}>Theo dõi</Button>
+                    )}
+                  </>
                 )}
               </div>
             </CardBody>
