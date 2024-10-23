@@ -24,6 +24,9 @@ export const ModalBasicUser: React.FC<ModalBasicUserProps> = ({
               <span>{Header}</span>
             </ModalHeader>
             <ModalBody className="overflow-y-auto max-h-[80vh] pb-9"> {/* Thêm max-height để đảm bảo modal không chiếm hết không gian */}
+              {ListUser.length === 0 && (
+                <div className="flex justify-center"><i>Chưa có thông tin</i></div>
+              )}
               {ListUser.map((user) => (
                 <>
                   <div key={user.id} className="flex justify-between items-center gap-4">
