@@ -377,8 +377,8 @@ export default function UserInfo() {
   const [emojiPost, setEmojiPost] = useState<{ [key: string]: FeelingGUI | null }>({});
   const [currentUser, setCurrentUser] = useState<UserProfilePage>();
   const {isOpen: isOpenModelUser, onOpen: onOpenModelUser, onOpenChange: onOpenChangeModelUser} = useDisclosure();
-  const [followingUserList, setFollowingUserList] = useState<UserBasicModel[]>([]);
-  const [followerUserList, setFollowerUserList] = useState<UserBasicModel[]>([]);
+  const [followUserList, setFollowUserList] = useState<UserBasicModel[]>([]);
+  const [Header, setHeader] = useState<string>("");
 
   // Fetch posts from API
   const fetchPosts = async (lastPostId: string | null) => {
@@ -594,7 +594,8 @@ export default function UserInfo() {
         avatar: following.avatar,
       });
     });
-    setFollowingUserList(followingUserList);
+    setHeader("Đang theo dõi");
+    setFollowUserList(followingUserList);
     onOpenModelUser();
   }
 
@@ -608,7 +609,8 @@ export default function UserInfo() {
         avatar: follower.avatar,
       });
     });
-    setFollowerUserList(followerUserList);
+    setHeader("Người theo dõi");
+    setFollowUserList(followerUserList);
     onOpenModelUser();
   }
 
@@ -641,7 +643,7 @@ export default function UserInfo() {
                       <Skeleton isLoaded={!isLoadingProfile} className="rounded-lg">
                         {!isLoadingProfile && currentUser ? (
                           <>
-                            <ModalBasicUser isOpen={isOpenModelUser} onOpenChange={onOpenChangeModelUser} ListUser={followingUserList} Header="Đang theo dõi"/>
+                            <ModalBasicUser isOpen={isOpenModelUser} onOpenChange={onOpenChangeModelUser} ListUser={followUserList} Header={Header}/>
                             <div
                               className="cursor-pointer inline-block hover:text-gray-400"
                               onMouseDownCapture={() => handleFollowing()}
@@ -649,7 +651,6 @@ export default function UserInfo() {
                               {`${currentUser?.following.length} Đang theo dõi`}
                             </div>
                             <span className="px-1 inline-block"> • </span>
-                            <ModalBasicUser isOpen={isOpenModelUser} onOpenChange={onOpenChangeModelUser} ListUser={followerUserList} Header="Người theo dõi"/>
                             <div
                               className="cursor-pointer inline-block hover:text-gray-400"
                               onMouseDownCapture={() => handleFollower()}
