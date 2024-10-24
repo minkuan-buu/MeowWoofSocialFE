@@ -39,7 +39,15 @@ export const ModalBasicUser: React.FC<ModalBasicUserProps> = ({
                       />
                       <span>{user.name}</span>
                     </div>
-                    <Button>Theo dõi</Button>
+                    {localStorage.getItem("id") != user.id ? (
+                      <>
+                        {user.isFollow ? (
+                          <Button>Bỏ theo dõi</Button>
+                        ) : (
+                          <Button>Theo dõi</Button>
+                        )}
+                      </>
+                    ) : null}
                   </div>
                 </>
               ))}

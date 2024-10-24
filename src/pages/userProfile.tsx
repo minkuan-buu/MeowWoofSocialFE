@@ -592,6 +592,7 @@ export default function UserInfo() {
         id: following.id,
         name: following.name,
         avatar: following.avatar,
+        isFollow: following.isFollow,
       });
     });
     setHeader("Đang theo dõi");
@@ -607,6 +608,7 @@ export default function UserInfo() {
         id: follower.id,
         name: follower.name,
         avatar: follower.avatar,
+        isFollow: follower.isFollow,
       });
     });
     setHeader("Người theo dõi");
@@ -627,12 +629,14 @@ export default function UserInfo() {
                     isLoaded={!isLoadingProfile}
                   >
                     {currentUser && (
-                      <Avatar
-                        className="w-36 h-36 text-large"
-                        name={currentUser.name}
-                        size="lg"
-                        src={currentUser.avatar}
-                      />
+                      <>
+                        <Avatar
+                          className="w-36 h-36 text-large"
+                          name={currentUser.name}
+                          size="lg"
+                          src={currentUser.avatar || undefined}
+                        />
+                      </>
                     )}
                   </Skeleton>
                   <div className="flex flex-col gap-2">

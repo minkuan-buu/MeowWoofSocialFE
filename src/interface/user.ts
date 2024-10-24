@@ -9,11 +9,13 @@ export interface UserProfilePage {
     id: string;
     name: string;
     avatar: string;
+    isFollow: boolean;
   }[],
   follower: {
     id: string;
     name: string;
     avatar: string;
+    isFollow: boolean;
   }[];
 };
 
@@ -21,4 +23,5 @@ export interface UserBasicModel {
   id: string;
   name: string;
   avatar: string;
+  isFollow: boolean;
 };
