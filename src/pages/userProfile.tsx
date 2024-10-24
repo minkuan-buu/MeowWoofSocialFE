@@ -25,6 +25,7 @@ import { ThreeDot } from "react-loading-indicators";
 import { useParams } from "react-router-dom";
 import { format } from "date-fns";
 import { ModalBasicUser } from "@/components/ModalUser";
+import { se } from "date-fns/locale";
 
 const PostCard: React.FC<{ post: Post, emojiPost: {[key: string]: FeelingGUI | null}, setEmojiPost: Dispatch<SetStateAction<{
   [key: string]: FeelingGUI | null;
@@ -573,6 +574,14 @@ export default function UserInfo() {
 
   useEffect(() => {
     // Fetch lần đầu khi component mount
+    setPosts([]);
+    hasMoreRef.current = true;
+    loadedPostsRef.current = new Set();
+    loadedPostsRef.current.clear();
+    lastPostIdRef.current = null;
+    setEmojiPost({});
+    setIsLoading(true);
+    setIsLoadingProfile(true);
     fetchProfile();
     fetchPosts(null);
     // Set up scroll event listener for lazy loading
@@ -582,7 +591,7 @@ export default function UserInfo() {
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, []);
+  }, [userId]);
 
   function handleFollowing() {
     var followingUserList: UserBasicModel[] = [];

@@ -134,7 +134,7 @@ export const Navbar = () => {
                 variant="bordered"
               >
                 <DropdownSection aria-label="Profile & Actions" showDivider>
-                  <DropdownItem key="info" startContent={<UserIcon />}>
+                  <DropdownItem key="info" startContent={<UserIcon />} href={`/user/${localStorage.getItem("id")}`}>
                     Thông tin cá nhân
                   </DropdownItem>
                 </DropdownSection>
