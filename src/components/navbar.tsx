@@ -66,22 +66,41 @@ export const Navbar = () => {
             <p className="font-bold text-inherit">MeowWoofSocial</p>
           </Link>
         </NavbarBrand>
-        <div className="hidden lg:flex gap-4 justify-start ml-2">
-          {siteConfig.navItems.map((item) => (
-            <NavbarItem key={item.href}>
-              <a
-                className={clsx(
-                  linkStyles({ color: "foreground" }),
-                  "data-[active=true]:text-primary data-[active=true]:font-medium",
-                )}
-                color="foreground"
-                href={item.href}
-              >
-                {item.label}
-              </a>
-            </NavbarItem>
-          ))}
-        </div>
+        {localStorage.getItem("token") != null ? (
+          <div className="hidden lg:flex gap-4 justify-start ml-2">
+            {siteConfig.navTokenItems.map((item) => (
+              <NavbarItem key={item.href}>
+                <a
+                  className={clsx(
+                    linkStyles({ color: "foreground" }),
+                    "data-[active=true]:text-primary data-[active=true]:font-medium",
+                  )}
+                  color="foreground"
+                  href={item.href}
+                >
+                  {item.label}
+                </a>
+              </NavbarItem>
+            ))}
+          </div>
+        ) : (
+          <div className="hidden lg:flex gap-4 justify-start ml-2">
+            {siteConfig.navItems.map((item) => (
+              <NavbarItem key={item.href}>
+                <a
+                  className={clsx(
+                    linkStyles({ color: "foreground" }),
+                    "data-[active=true]:text-primary data-[active=true]:font-medium",
+                  )}
+                  color="foreground"
+                  href={item.href}
+                >
+                  {item.label}
+                </a>
+              </NavbarItem>
+            ))}
+          </div>
+        )}
       </NavbarContent>
 
       <NavbarContent

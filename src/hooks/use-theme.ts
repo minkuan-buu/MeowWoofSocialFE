@@ -44,7 +44,7 @@ export const useTheme = (defaultTheme?: Theme) => {
 
   useEffect(() => {
     _setTheme(theme);
-  });
+  }, [theme]);
 
   return { theme, isDark, isLight, setLightTheme, setDarkTheme, toggleTheme };
 };

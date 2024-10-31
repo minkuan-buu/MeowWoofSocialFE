@@ -964,15 +964,14 @@ export default function IndexPage() {
                       }
                       src={localStorage.getItem("avatar") || undefined}
                     />
-                  <Button
-                    className="status-bar select-none"
-                    onPress={onOpenCreatePost}
-                    style={{ backgroundColor: "#e5dfca" }}
-                  >
+                    <Button
+                      className="status-bar select-none"
+                      onPress={onOpenCreatePost}
+                      style={{ backgroundColor: "#e5dfca" }}
+                    >
                       <span className="status-icon">😊</span>
                       <span className="status-text">
-                        {localStorage.getItem("name")} ơi, bạn đang nghĩ gì
-                        thế?
+                        {localStorage.getItem("name")} ơi, bạn đang nghĩ gì thế?
                       </span>
                     </Button>
                   </div>
@@ -987,8 +986,8 @@ export default function IndexPage() {
                 </div>
               ) : null}
               {!hasMoreRef.current ? (
-                  <div className="flex justify-center text-[#102530]">
-                    Không còn nội dung nào
+                <div className="flex justify-center text-[#102530]">
+                  Không còn nội dung nào
                 </div>
               ) : null}
               {/* <Card>

@@ -25,6 +25,32 @@ export const siteConfig = {
     //   href: "/about",
     // },
   ],
+  navTokenItems: [
+    {
+      label: "Trang chủ",
+      href: "/#",
+    },
+    {
+      label: "Dịch vụ",
+      href: "/services",
+    },
+    {
+      label: "Cửa hàng",
+      href: "/stores",
+    },
+    // {
+    //   label: "Pricing",
+    //   href: "/pricing",
+    // },
+    // {
+    //   label: "Blog",
+    //   href: "/blog",
+    // },
+    // {
+    //   label: "About",
+    //   href: "/about",
+    // },
+  ],
   navMenuItems: [
     // {
     //   label: "Profile",
