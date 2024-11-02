@@ -1,5 +1,6 @@
 import { Banner } from "@/components/store/banner";
 import { Category } from "@/components/store/category";
+import { TopProductTrending } from "@/components/store/product";
 import NonFooterLayout from "@/layouts/non-footer";
 
 export default function Store() {
@@ -9,6 +10,7 @@ export default function Store() {
         <div className="flex flex-col gap-4 h-full">
           <Banner />
           <Category />
+          <TopProductTrending />
         </div>
       </div>
     </NonFooterLayout>

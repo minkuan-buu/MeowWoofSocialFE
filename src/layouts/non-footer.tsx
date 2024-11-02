@@ -14,7 +14,7 @@ export default function NonFooterLayout({
       <Navbar />
       <main className="min-h-full h-full">
         <section className="bg-[#e5dfca]" style={{ minHeight: "880px" }}>
-            {children}
+          {children}
         </section>
        </main>
       {/* <footer className="w-full h-full py-2" style={{backgroundColor: "#102530"}}>

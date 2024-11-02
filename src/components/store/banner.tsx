@@ -6,9 +6,11 @@ export function Banner() {
   const showButton = useRef<boolean>(false);
   const progressDuration = 8000; // Thời gian chạy đầy progress bar (7 giây)
   const images = [
-    "https://firebasestorage.googleapis.com/v0/b/meowwoofsocial-75790.appspot.com/o/TI%C3%8AU%20%C4%90%E1%BB%80%20(500%20x%20500%20px)%20(1000%20x%20200%20px).png?alt=media&token=9b2e6f81-0733-4e75-9910-6149784af430",
-    "https://images.unsplash.com/photo-1493246507139-91e8fad9978e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2940&q=80",
-    "https://images.unsplash.com/photo-1518623489648-a173ef7824f3?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2762&q=80",
+    "https://firebasestorage.googleapis.com/v0/b/meowwoofsocial-75790.appspot.com/o/banner%2F1.png?alt=media&token=c3d38a39-ef9a-4a73-b0ff-ea4584b42d2f",
+    "https://firebasestorage.googleapis.com/v0/b/meowwoofsocial-75790.appspot.com/o/banner%2F8.png?alt=media&token=e3dd0aed-d9a4-4756-bd96-3521d6919e86",
+    "https://firebasestorage.googleapis.com/v0/b/meowwoofsocial-75790.appspot.com/o/banner%2F2.png?alt=media&token=e3b59713-785a-4821-a28b-2cbb9c16eec9",
+    "https://firebasestorage.googleapis.com/v0/b/meowwoofsocial-75790.appspot.com/o/banner%2F4.png?alt=media&token=a53ec937-fa40-404d-bd89-72b025b20e46",
+    "https://firebasestorage.googleapis.com/v0/b/meowwoofsocial-75790.appspot.com/o/banner%2F5.png?alt=media&token=bf8d7ed4-09f4-47e0-b7ff-e5d049cc4c91",
   ];
   const length = images.length;
 
@@ -55,7 +57,7 @@ export function Banner() {
   }
   
   return (
-    <div className="relative max-w-[1000px] h-[200px] w-full overflow-hidden rounded-xl" onMouseEnter={() => handleMouseEnter()} onMouseLeave={() => handleMouseLeave()}>
+    <div className="relative max-w-[1225px] h-[200px] w-full overflow-hidden rounded-xl" onMouseEnter={() => handleMouseEnter()} onMouseLeave={() => handleMouseLeave()}>
       <div
         className="flex transition-transform duration-500 ease-in-out"
         style={{

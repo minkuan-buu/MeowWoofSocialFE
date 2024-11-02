@@ -6,6 +6,8 @@ import PricingPage from "@/pages/pricing";
 import { ImageViewPage } from "@/pages/ImageViewPage";
 import UserInfo from "@/pages/userProfile";
 import Store from "./pages/stores";
+import TransactionNotifications from "./pages/test";
+import ProductDetail from "./pages/productDetail";
 
 function App() {
   return (
@@ -16,6 +18,8 @@ function App() {
       <Route element={<ImageViewPage />} path="/post/:postId/attachment/:attachmentId" />
       <Route element={<UserInfo />} path="/user/:userId" />
       <Route element={<Store />} path="/stores" />
+      <Route element={<ProductDetail />} path="/stores/product/:productId" />
+      <Route element={<TransactionNotifications />} path="/test" />
     </Routes>
   );
 }
