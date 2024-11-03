@@ -13,7 +13,7 @@ export default function NonFooterLayout({
     <div className="flex flex-col h-full">
       <Navbar />
       <main className="min-h-full h-full">
-        <section className="bg-[#e5dfca]" style={{ minHeight: "880px" }}>
+        <section className="bg-[#e5dfca]" style={{ minHeight: "890px" }}>
           {children}
         </section>
        </main>

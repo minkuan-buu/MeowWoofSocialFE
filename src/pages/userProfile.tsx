@@ -1,3 +1,21 @@
+import { Button } from "@nextui-org/button";
+import {
+  Avatar,
+  Card,
+  CardBody,
+  CardHeader,
+  Divider,
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownTrigger,
+  Image,
+  Modal,
+  Skeleton,
+  useDisclosure,
+} from "@nextui-org/react";
+import { Link } from "@nextui-org/link";
+
 import { GETUSERPOST } from "@/api/Post";
 import { GETUSER } from "@/api/User";
 import { CommentForm } from "@/components/comment";
@@ -5,15 +23,12 @@ import { calculateTimeDifference } from "@/components/func/postFunc";
 import { LikeButton, LikeButtonUserProfile } from "@/components/likeButton";
 import Logout from "@/components/logout";
 import { DeletePost, PostDetailPopup, UpdatePost } from "@/components/post";
-import { title } from "@/components/primitives";
 import { ShareModal } from "@/components/share";
 import { FeelingGUI } from "@/interface/feeling";
 import { Post } from "@/interface/post";
 import { UserBasicModel, UserProfilePage } from "@/interface/user";
 import NonFooterLayout from "@/layouts/non-footer";
-import { Button } from "@nextui-org/button";
-import { Link, LinkIcon } from "@nextui-org/link";
-import { Avatar, Card, CardBody, CardHeader, Divider, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Image, Modal, Skeleton, useDisclosure } from "@nextui-org/react";
+
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { FaRegBookmark, FaRegCommentAlt, FaShareSquare } from "react-icons/fa";

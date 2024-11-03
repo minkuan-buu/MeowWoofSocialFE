@@ -8,6 +8,8 @@ import UserInfo from "@/pages/userProfile";
 import Store from "./pages/stores";
 import TransactionNotifications from "./pages/test";
 import ProductDetail from "./pages/productDetail";
+import Checkout from "./pages/checkout";
+import Transaction from "./pages/transactionPage";
 
 function App() {
   return (
@@ -19,6 +21,8 @@ function App() {
       <Route element={<UserInfo />} path="/user/:userId" />
       <Route element={<Store />} path="/stores" />
       <Route element={<ProductDetail />} path="/stores/product/:productId" />
+      <Route element={<Checkout />} path="/checkout/:orderId" />
+      <Route element={<Transaction />} path="/payment" />
       <Route element={<TransactionNotifications />} path="/test" />
     </Routes>
   );
