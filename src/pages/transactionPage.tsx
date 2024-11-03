@@ -19,8 +19,9 @@ function Transaction() {
     refId = parseInt(refIdQuery, 10);
   }
   const [messages, setMessages] = useState<{ orderId: number; message: any }[]>([]);
-
+  const [ok, setOk] = useState(false);
   const fetchRefId = async () => {
+    if (ok) return;
     try {
       if (refIdQuery == null) {
         window.location.href = "/stores";
@@ -37,7 +38,73 @@ function Transaction() {
       });
 
       if (result.isSuccess && result.res != null) {
-        const connection = new signalR.HubConnectionBuilder()
+        setOk(true);
+      } else {
+        if (result.statusCode === 401) {
+          Logout();
+          return;
+        } else {
+          window.location.href = "/stores";
+          return;
+        }
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  var payloadPayment = {
+    "bank_acc_id": "1020546203"
+  };
+
+  const fetchPayment = async () => {
+    try {
+      const response = await fetch("https://oauth.casso.vn/v2/sync", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Apikey AK_CS.a5242fa096d411ef98eebd0598ac83dd.RQhPGGVEdlwyam5yScYrWF9EBz4A558rSBeSv0vTAtCgB7OR04LfndT3dblWPoWruUEYWvRJ"
+        },
+        body: JSON.stringify(payloadPayment),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Transaction synced successfully:", data);
+      } else {
+        console.error("Failed to sync transaction:", response.status);
+      }
+    } catch (error) {
+      console.error("Error syncing transaction:", error);
+    }
+  };
+  var intervalId: NodeJS.Timeout;
+
+  useEffect(() => {
+    const timerId = setTimeout(() => {
+      fetchPayment();
+
+      intervalId = setInterval(fetchPayment, 60000);
+
+      return () => clearInterval(intervalId);
+    }, 10000);
+
+    return () => clearTimeout(timerId);
+  }, []);
+
+  useEffect(() => {
+    if (messages.find(obj => obj.message.statusPayment === "Success")){
+      clearInterval(intervalId);
+    }
+  }, [messages]);
+
+  useEffect(() => {
+    fetchRefId();
+  }, [refId]);
+
+  useEffect(() => {
+    if(ok){
+      const connection = new signalR.HubConnectionBuilder()
           .withUrl("https://api.meowwoofsocial.com/hub/transactionhub")
           .configureLogging(signalR.LogLevel.Information)
           .build();
@@ -57,55 +124,8 @@ function Transaction() {
         return () => {
           connection.stop();
         };
-      } else {
-        if (result.statusCode === 401) {
-          Logout();
-        }
-      }
-    } catch (e) {
-      console.log(e);
     }
-  }
-
-  const fetchPayment = async () => {
-    try {
-      const response = await fetch("https://oauth.casso.vn/v2/sync", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Apikey 785DC169D8B4C8FBFE2631398539C"
-        },
-        body: JSON.stringify({
-          bank_acc_id: "1020546203",
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log("Transaction synced successfully:", data);
-      } else {
-        console.error("Failed to sync transaction:", response.status);
-      }
-    } catch (error) {
-      console.error("Error syncing transaction:", error);
-    }
-  };
-
-  useEffect(() => {
-    const timerId = setTimeout(() => {
-      fetchPayment();
-
-      const intervalId = setInterval(fetchPayment, 60000);
-
-      return () => clearInterval(intervalId);
-    }, 10000);
-
-    return () => clearTimeout(timerId);
-  }, []);
-
-  useEffect(() => {
-    fetchRefId();
-  }, [refId]);
+  }, [ok]);
 
   return (
     // <div>
