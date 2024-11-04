@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from "react";
 import * as signalR from "@microsoft/signalr";
 import { useLocation, useParams } from "react-router-dom";
-import { CHECKREF } from "@/api/Order";
+import { CANCELTRANSACTION, CHECKREF } from "@/api/Order";
 import Logout from "@/components/logout";
 import { PaymentCard } from "@/components/store/payment/paymentCard";
+import { set } from "date-fns";
+const cassoApiKey = import.meta.env.VITE_CASSO_APIKEY;
 
 function Transaction() {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
+  const [currentTransactionId, setCurrentTransactionId] = useState<string | null>(null);
 
   const orderId = queryParams.get("orderId");
   var refIdQuery = queryParams.get("refId");
@@ -36,18 +39,23 @@ function Transaction() {
         refId: refIdQuery,
         token: localStorage.token,
       });
-
+      
       if (result.isSuccess && result.res != null) {
-        setOk(true);
+        if ('data' in result.res) {
+          const data = result.res.data;
+          setCurrentTransactionId(data.id)
+          setOk(true);
+        }
       } else {
         if (result.statusCode === 401) {
           Logout();
           return;
-        } else {
+        } else if (result.statusCode === 400) {
           window.location.href = "/stores";
           return;
         }
       }
+      
     } catch (e) {
       console.log(e);
     }
@@ -57,39 +65,18 @@ function Transaction() {
     "bank_acc_id": "1020546203"
   };
 
-  const fetchPayment = async () => {
-    try {
-      const response = await fetch("https://oauth.casso.vn/v2/sync", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Apikey AK_CS.a5242fa096d411ef98eebd0598ac83dd.RQhPGGVEdlwyam5yScYrWF9EBz4A558rSBeSv0vTAtCgB7OR04LfndT3dblWPoWruUEYWvRJ"
-        },
-        body: JSON.stringify(payloadPayment),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log("Transaction synced successfully:", data);
-      } else {
-        console.error("Failed to sync transaction:", response.status);
-      }
-    } catch (error) {
-      console.error("Error syncing transaction:", error);
-    }
-  };
   var intervalId: NodeJS.Timeout;
 
   useEffect(() => {
-    const timerId = setTimeout(() => {
-      fetchPayment();
+    // const timerId = setTimeout(() => {
+    //   fetchPayment();
 
-      intervalId = setInterval(fetchPayment, 60000);
+    //   intervalId = setInterval(fetchPayment, 60000);
 
-      return () => clearInterval(intervalId);
-    }, 10000);
+    //   return () => clearInterval(intervalId);
+    // }, 10000);
 
-    return () => clearTimeout(timerId);
+    // return () => clearTimeout(timerId);
   }, []);
 
   useEffect(() => {
@@ -103,29 +90,75 @@ function Transaction() {
   }, [refId]);
 
   useEffect(() => {
-    if(ok){
+    if (ok) {
       const connection = new signalR.HubConnectionBuilder()
-          .withUrl("https://api.meowwoofsocial.com/hub/transactionhub")
-          .configureLogging(signalR.LogLevel.Information)
-          .build();
-
-        connection.start().then(() => {
-          console.log("Connected to the SignalR hub");
-          // Join the group based on the orderId
-          connection.invoke("JoinGroup", refId).catch(err => console.error("Error joining group: ", err));
-        }).catch(err => console.error("Error connecting to SignalR hub: ", err));
-
-        connection.on("ReceiveTransactionUpdate", (data) => {
-          console.log("Order ID:", data.orderId, "Message:", data.data);
-          // Lưu tin nhắn vào state
-          setMessages(prevMessages => [...prevMessages, { orderId: data.orderId, message: data.data }]);
-        });
-
-        return () => {
-          connection.stop();
+        .withUrl("https://api.meowwoofsocial.com/hub/transactionhub")
+        .configureLogging(signalR.LogLevel.Information)
+        .build();
+  
+      let isUserNavigatingAway = false;
+  
+      // Handle connection close
+      connection.onclose((error) => {
+        cancelTransaction();
+        alert("Giao dịch đã bị hủy");
+        console.warn("SignalR connection closed:", error);
+        if (isUserNavigatingAway) {
+          alert("User navigated away");
+          // User intentionally navigated away, so call the API to cancel the transaction
+          // cancelTransaction();
+        } else {
+          // Handle reconnection logic or show a warning to the user
+        }
+      });
+  
+      const cancelTransaction = async () => {
+        if(currentTransactionId == null) {
+          return window.location.href = "/stores";
         };
+        try {
+          // Gọi API để hủy giao dịch
+          const result = await CANCELTRANSACTION({
+            transactionId: currentTransactionId,
+            token: localStorage.token,
+          });
+        } catch (error) {
+          console.error("Failed to cancel transaction:", error);
+        }
+      };
+  
+      const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+        isUserNavigatingAway = true;
+        alert("Are you sure you want to leave?");
+        // Optionally show a confirmation message if needed
+        // event.returnValue = "Are you sure you want to leave?";
+      };
+  
+      window.addEventListener("beforeunload", handleBeforeUnload);
+  
+      connection.start().then(() => {
+        console.log("Connected to the SignalR hub");
+        connection.invoke("JoinGroup", refId).catch((err) =>
+          console.error("Error joining group: ", err)
+        );
+      }).catch((err) => console.error("Error connecting to SignalR hub: ", err));
+  
+      connection.on("ReceiveTransactionUpdate", (data) => {
+        console.log("Order ID:", data.orderId, "Message:", data.data);
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          { orderId: data.orderId, message: data.data },
+        ]);
+      });
+  
+      // Cleanup on unmount
+      return () => {
+        window.removeEventListener("beforeunload", handleBeforeUnload);
+        connection.stop();
+      };
     }
   }, [ok]);
+  
 
   return (
     // <div>

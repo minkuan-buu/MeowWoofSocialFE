@@ -1,25 +1,48 @@
-import { OrderDetail } from "@/interface/order";
 import { Button } from "@nextui-org/button";
-import { Card, CardBody, CardHeader, Divider, Spinner } from "@nextui-org/react";
-import React, { useEffect } from "react";
+import { Card, CardBody, Divider, Spinner } from "@nextui-org/react";
+import React, { useEffect, useState } from "react";
 import { FaCheckCircle } from "react-icons/fa";
-import { FaLocationDot } from "react-icons/fa6";
 
 interface PaymentCardProps {
   orderId: string;
   refId: number;
   amount: string;
-  data: any;
+  data: { orderId: number; message: any }[];
 }
 
-export const PaymentCard: React.FC<PaymentCardProps> = ({orderId, refId, amount, data}) =>  {
-  const [isSuccess, setIsSuccess] = React.useState<boolean>(false);
+export const PaymentCard: React.FC<PaymentCardProps> = ({ orderId, refId, amount, data }) => {
+  const [isSuccess, setIsSuccess] = useState<boolean>(false);
 
   useEffect(() => {
-    if (data.statusPayment === "Success") {
+    // Lấy thông điệp cuối cùng từ `data` để kiểm tra trạng thái thanh toán
+    const latestMessage = data[data.length - 1]?.message;
+    if (latestMessage?.statusPayment === "Success") {
       setIsSuccess(true);
     }
-  }, [data]);
+  }, [data]); // Theo dõi `data` để cập nhật khi có tin nhắn mới
+
+  const [secondsResend, setSecondsResend] = useState<number>(0);
+
+  useEffect(() => {
+    if (isSuccess) {
+      // Gửi thông báo cho người dùng
+      const createdTime = new Date();
+      const returnTime = createdTime.setSeconds(createdTime.getSeconds() + 5);
+      const firstNow = new Date();
+      let time = returnTime - firstNow.getTime();
+      setSecondsResend(Math.floor((time % (1000 * 60)) / 1000));
+      const interval = setInterval(() => {
+        const now = new Date();
+        let time = returnTime - now.getTime();
+        setSecondsResend(Math.floor((time % (1000 * 60)) / 1000));
+        if(time < 0){
+          clearInterval(interval);
+          setSecondsResend(0);
+          window.location.href = "/stores";
+        }
+      }, 1000);
+    }
+  }, [isSuccess]);
 
   return (
     <Card className="p-7">
@@ -40,6 +63,7 @@ export const PaymentCard: React.FC<PaymentCardProps> = ({orderId, refId, amount,
                 <>
                   <FaCheckCircle className="w-10 h-10 text-[#00bf23]" />
                   <span>Giao dịch thành công</span>
+                  <i>{`Đang chuyển hướng về "Cửa hàng" sau ${secondsResend} giây`}</i>
                 </>
               ) : (
                 <Spinner size="lg" />
@@ -48,13 +72,13 @@ export const PaymentCard: React.FC<PaymentCardProps> = ({orderId, refId, amount,
           </div>
           <div className="col-span-7 items-end">
             <img 
-                src={`https://api.vietqr.io/image/970436-1020546203-2oeIArK.jpg?amount=${amount}&addInfo=DH${refId}`} 
-                alt="QR code" 
-                className="object-cover"
+              src={`https://api.vietqr.io/image/970415-103873806167-2oeIArK.jpg?amount=${amount}&addInfo=DH${refId}`} 
+              alt="QR code" 
+              className="object-cover"
             />
           </div>
         </div>
       </CardBody>
     </Card>
-  ); // Replace null with your desired JSX code
-}
+  );
+};

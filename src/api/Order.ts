@@ -65,7 +65,7 @@ export const GETORDER: ApiCall<
 
 export const CHECKREF: ApiCall<
   { refId: string; token: string },
-  { data: OrderDetail }
+  { data: {id: string} } | { message: string }
 > = async (body) => {
   const res = await fetch(API_URL + `order/check/${body.refId}`, {
     method: "GET",
@@ -79,16 +79,45 @@ export const CHECKREF: ApiCall<
     const data = await res.json();
 
     return {
-      isSuccess: res.ok, // Kiểm tra trạng thái 2xx
-      res: res.ok ? data : null, // Chỉ trả về dữ liệu nếu thành công
-      statusCode: res.status, // Mã trạng thái HTTP
+      isSuccess: res.ok,
+      res: res.ok ? data : null,
+      statusCode: res.status,
     };
   } catch (error) {
-    // Lỗi khi không thể parse JSON hoặc lỗi mạng
     return {
       isSuccess: false,
       res: null,
+      statusCode: 500, // Lỗi mạng
+    };
+  }
+};
+
+export const CANCELTRANSACTION: ApiCall<
+  { transactionId: string; token: string },
+  { data: OrderDetail } | { message: string }
+> = async (body) => {
+  const res = await fetch(API_URL + `transaction/cancel`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + body.token,
+    },
+    body: JSON.stringify(body.transactionId),
+  });
+
+  try {
+    const data = await res.json();
+
+    return {
+      isSuccess: res.ok,
+      res: res.ok ? data : null,
       statusCode: res.status,
+    };
+  } catch (error) {
+    return {
+      isSuccess: false,
+      res: null,
+      statusCode: 500, // Lỗi mạng
     };
   }
 };
