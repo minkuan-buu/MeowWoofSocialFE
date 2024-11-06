@@ -1,3 +1,6 @@
+import exp from "constants";
+import { is } from "date-fns/locale";
+
 export interface UserProfilePage {
   id: string;
   name: string;
@@ -25,3 +28,23 @@ export interface UserBasicModel {
   avatar: string;
   isFollow: boolean;
 };
+
+export interface UserAddress {
+  id: string;
+  name: string;
+  phone: string;
+  address: string;
+  isDefault: boolean;
+}
+
+export interface UserAddressSetDefault {
+  id: string;
+  isDefault: boolean;
+  updateAt: Date;
+}
+
+export interface UserAddressReq {
+  name: string;
+  phone: string;
+  address: string;
+}

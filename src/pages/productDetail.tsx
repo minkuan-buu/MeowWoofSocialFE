@@ -7,6 +7,7 @@ import { BreadcrumbItem, Breadcrumbs } from "@nextui-org/react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { FiXCircle } from "react-icons/fi";
+import { ThreeDot } from "react-loading-indicators";
 import { useParams } from "react-router-dom";
 
 export default function ProductDetail() {
@@ -85,20 +86,27 @@ export default function ProductDetail() {
     <NonFooterLayout>
       <div className="flex justify-center pt-5 pb-20">
         <div className="flex flex-col gap-4 h-full">
-          <div>
-            <Breadcrumbs 
-              itemClasses={{
-                item: "text-[#102530]/100 data-[current=true]:text-[#102530] data-[current=true]:font-bold text-md",
-                separator: "text-[#102530]",
-              }}>
-              <BreadcrumbItem href="/stores">Cửa hàng</BreadcrumbItem>
-              <BreadcrumbItem>{currentProduct?.category.parentCategory.name}</BreadcrumbItem>
-              <BreadcrumbItem>{currentProduct?.category.name}</BreadcrumbItem>
-              <BreadcrumbItem>{currentProduct?.name}</BreadcrumbItem>
-            </Breadcrumbs>
-          </div>
-          {isLoadingProduct && <div>Loading...</div>}
-          {currentProduct && <ProductBar product={currentProduct} />}
+          {isLoadingProduct ? (
+            <div className="flex justify-center">
+              <ThreeDot color="#102530" size="medium" text="" textColor="" />
+            </div>
+          ) : (
+            <>
+              <div>
+                <Breadcrumbs 
+                  itemClasses={{
+                    item: "text-[#102530]/100 data-[current=true]:text-[#102530] data-[current=true]:font-bold text-md",
+                    separator: "text-[#102530]",
+                  }}>
+                  <BreadcrumbItem href="/stores">Cửa hàng</BreadcrumbItem>
+                  <BreadcrumbItem>{currentProduct?.category.parentCategory.name}</BreadcrumbItem>
+                  <BreadcrumbItem>{currentProduct?.category.name}</BreadcrumbItem>
+                  <BreadcrumbItem>{currentProduct?.name}</BreadcrumbItem>
+                </Breadcrumbs>
+              </div>
+              {currentProduct && <ProductBar product={currentProduct} />}
+            </>
+          )}
         </div>
       </div>
     </NonFooterLayout>

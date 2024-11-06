@@ -25,6 +25,7 @@ export interface OrderDetail {
     name: string;
     phone: string;
     address: string;
+    isDefault: boolean;
   };
   totalPrice: number;
 }

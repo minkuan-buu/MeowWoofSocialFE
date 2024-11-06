@@ -6,6 +6,7 @@ import { PaymentBar } from "@/components/store/order/paymenBar";
 import { OrderDetail } from "@/interface/order";
 import NonFooterLayout from "@/layouts/non-footer";
 import { useEffect, useState } from "react";
+import { Toaster } from "react-hot-toast";
 import { useParams } from "react-router-dom";
 
 export default function Checkout() {
@@ -41,9 +42,10 @@ export default function Checkout() {
 
   return (
     <NonFooterLayout>
+      <Toaster position="bottom-left" reverseOrder={false} />
       <div className="flex justify-center pt-5 pb-20">
         <div className="flex flex-col gap-4 min-w-[1220px] h-full">
-          {order && <AddressBar order={order} />}
+          {order && <AddressBar order={order} setOrder={setOrder} />}
           {order && <OrderDetailBar order={order} />}
           {order && <PaymentBar order={order} />}
         </div>

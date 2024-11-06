@@ -61,7 +61,7 @@ export const PaymentBar: React.FC<PaymentBarProps> = ({ order }) =>  {
           </div>
         </div>
         <div className="flex flex-row justify-end items-center">
-          <Button className="mt-5 p-7 text-xl bg-[#ed5c02]" as={Link} href={`/payment?orderId=${order.id}&refId=${order.refId}&amount=${order.totalPrice}`}>Đặt hàng</Button>
+          <Button className="mt-5 p-7 text-xl bg-[#ed5c02]" isDisabled={order.userAddress == null} as={Link} href={`/payment?orderId=${order.id}&refId=${order.refId}&amount=${order.totalPrice}`}>Đặt hàng</Button>
         </div>
       </CardBody>
     </Card>

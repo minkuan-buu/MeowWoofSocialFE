@@ -30,20 +30,18 @@ export const OrderDetailBar: React.FC<OrderDetailBarProps> = ({ order }) => {
                   <span>Sản phẩm</span>
                 </div>
               </th>
-              <th className="text-sm">Đơn giá</th>
-              <th className="text-sm">Số lượng</th>
-              <th className="text-sm">Thành tiền</th>
+              <th className="text-sm text-default-500 font-medium">Đơn giá</th>
+              <th className="text-sm text-default-500 font-medium">Số lượng</th>
+              <th className="text-sm text-default-500 font-medium">Thành tiền</th>
             </tr>
           </thead>
           <tbody>
             {order.petStores.map((item, index) => (
-              <>
+              <React.Fragment key={item.id}>
                 {item.orderDetails.map((itemProduct, index) => (
                   <tr key={index} className="my-1">
-                    {" "}
                     {/* Giảm margin giữa các hàng */}
                     <td className="py-3">
-                      {" "}
                       {/* Giảm padding trên và dưới */}
                       {index === 0 && (
                         <div className="flex flex-row items-center gap-2 text-xl p-1 bg-[#ed5c02] rounded-xl max-w-fit">
@@ -57,9 +55,14 @@ export const OrderDetailBar: React.FC<OrderDetailBarProps> = ({ order }) => {
                           alt=""
                           className="w-16 h-16 object-cover"
                         />
-                        <span className="text-lg">
-                          {itemProduct.productName}
-                        </span>
+                        <div className="flex flex-col">
+                          <span className="text-lg line-clamp-1">
+                            {itemProduct.productName}
+                          </span>
+                          <span className="text-sm">
+                            Phân loại: <span className="text-[#a1a1aa]">{itemProduct.productItemName}</span>
+                          </span>
+                        </div>
                       </div>
                     </td>
                     <td className={`py-3 ${index === 0 && "pt-12"}`}>₫{itemProduct.unitPrice.toLocaleString().replace(/,/g, '.')}</td>
@@ -69,7 +72,7 @@ export const OrderDetailBar: React.FC<OrderDetailBarProps> = ({ order }) => {
                     </td>
                   </tr>
                 ))}
-              </>
+              </React.Fragment>
             ))}
           </tbody>
         </table>

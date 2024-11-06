@@ -88,6 +88,8 @@ export const ProductBar: React.FC<ProductBarProps> = ({ product }) =>  {
       }
     } catch (e) {
       console.log(e);
+    } finally {
+      setOnLoading(false);
     }
   }
 
@@ -170,7 +172,7 @@ export const ProductBar: React.FC<ProductBarProps> = ({ product }) =>  {
                 </div>
               </div>
             </div>
-            <div className="mt-auto">
+            <div className="flex items-center mt-auto">
               <Button
                 className="border-[#ed5c02]"
                 variant="bordered"
