@@ -1,8 +1,9 @@
-import { Button } from "@nextui-org/react";
+import { Button, Link } from "@nextui-org/react";
 import { useEffect, useState } from "react";
 
 import { LoginForm, RegisterForm } from "@/components/authentication-form";
 import DefaultLayout from "@/layouts/default";
+import { is } from "date-fns/locale";
 
 
 export default function DocsPage() {
@@ -47,7 +48,7 @@ export default function DocsPage() {
 
         {/* Form Section */}
         <div
-          className={`flex justify-center col-span-4 transition-opacity duration-700 ease-in-out ${isRegistering ? `translate-x-0 ${opacity}` : `translate-x-0 ${opacity}`}`}
+          className={`flex justify-center items-start col-span-4 transition-opacity duration-700 ease-in-out ${isRegistering ? `translate-x-0 ${opacity}` : `translate-x-0 ${opacity}`}`}
         >
           <div
             className={`w-96 ${!isRegistering ? "mt-52" : "mt-32"} font-literata font-bold`}
@@ -62,7 +63,7 @@ export default function DocsPage() {
                 <LoginForm />
               )}
             </div>
-            <span style={{ color: "#102530" }} className="mr-4">
+            <span style={{ color: "#102530" }} className="mr-2">
               {isRegistering ? "Đã có tài khoản?" : "Chưa có tài khoản?"}
             </span>
             <Button
@@ -71,6 +72,15 @@ export default function DocsPage() {
             >
               {isRegistering ? "Quay trở lại đăng nhập" : "Đăng ký ngay"}
             </Button>
+            {!isRegistering && (
+              <Button
+                as={Link}
+                href="/recovery"
+                style={{ backgroundColor: "#ed5c02", color: "#FFF" }}
+              >
+                Quên mật khẩu?
+              </Button>
+            )}
           </div>
         </div>
       </section>

@@ -10,10 +10,12 @@ export default function DefaultLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="relative flex flex-col h-full">
+    <div className="relative flex flex-col h-screen">
       <Navbar />
       <main className="min-w-full">
-        {children}
+        <section className="bg-[#e5dfca]">
+          {children}
+        </section>
       </main>
       <footer className="w-full h-full py-2" style={{backgroundColor: "#102530"}}>
 

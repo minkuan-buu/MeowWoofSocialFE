@@ -39,7 +39,7 @@ function Transaction() {
         refId: refIdQuery,
         token: localStorage.token,
       });
-      
+
       if (result.isSuccess && result.res != null) {
         if ('data' in result.res) {
           const data = result.res.data;
@@ -60,11 +60,7 @@ function Transaction() {
       console.log(e);
     }
   }
-
-  var payloadPayment = {
-    "bank_acc_id": "1020546203"
-  };
-
+  
   var intervalId: NodeJS.Timeout;
 
   useEffect(() => {

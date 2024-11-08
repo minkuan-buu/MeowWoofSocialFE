@@ -10,7 +10,7 @@ export default function NonFooterLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-screen">
       <Navbar />
       <main className="min-h-full h-full">
         <section className="bg-[#e5dfca]" style={{ minHeight: "890px" }}>
