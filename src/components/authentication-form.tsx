@@ -47,6 +47,7 @@ export const LoginForm = () => {
             localStorage.setItem("token", successResponse.token);
             localStorage.setItem("name", successResponse.name);
             localStorage.setItem("role", successResponse.role);
+            localStorage.setItem("avatar", successResponse.avartar);
             setTimeout(() =>{
               window.location.href = "/"
             }, 1000);

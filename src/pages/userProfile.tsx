@@ -592,6 +592,10 @@ export default function UserInfo() {
   };
 
   useEffect(() => {
+    if(localStorage.token == null) {
+      window.location.href = "/authentication";
+      return;
+    }
     // Fetch lần đầu khi component mount
     setIsHoverAvatar(false);
     setPosts([]);

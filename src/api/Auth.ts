@@ -8,6 +8,7 @@ export const LOGIN: ApiCall<
         name: string;
         email: string;
         phone: string;
+        avartar: string;
         role: string;
         token: string;
       };
