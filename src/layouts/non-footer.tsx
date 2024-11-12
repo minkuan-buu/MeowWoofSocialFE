@@ -10,13 +10,13 @@ export default function NonFooterLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-full">
       <Navbar />
       <main className="min-h-full h-full">
         <section className="bg-[#e5dfca]" style={{ minHeight: "890px" }}>
           {children}
         </section>
-       </main>
+      </main>
       {/* <footer className="w-full h-full py-2" style={{backgroundColor: "#102530"}}>
 
         <div className="flex justify-between">

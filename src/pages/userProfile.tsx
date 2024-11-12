@@ -41,6 +41,8 @@ import { useParams } from "react-router-dom";
 import { format } from "date-fns";
 import { ModalBasicUser } from "@/components/ModalUser";
 import { se } from "date-fns/locale";
+import { CameraIcon } from "@/components/icons";
+import { AvatarChange } from "@/components/profile/avatarChange";
 
 const PostCard: React.FC<{ post: Post, emojiPost: {[key: string]: FeelingGUI | null}, setEmojiPost: Dispatch<SetStateAction<{
   [key: string]: FeelingGUI | null;
@@ -393,8 +395,10 @@ export default function UserInfo() {
   const [emojiPost, setEmojiPost] = useState<{ [key: string]: FeelingGUI | null }>({});
   const [currentUser, setCurrentUser] = useState<UserProfilePage>();
   const {isOpen: isOpenModelUser, onOpen: onOpenModelUser, onOpenChange: onOpenChangeModelUser} = useDisclosure();
+  const {isOpen: isOpenChangeAvatar, onOpen: onOpenChangeAvatar, onOpenChange: onOpenChangeChangeAvatar} = useDisclosure();
   const [followUserList, setFollowUserList] = useState<UserBasicModel[]>([]);
   const [Header, setHeader] = useState<string>("");
+  const [isHoverAvatar, setIsHoverAvatar] = useState<boolean>(false);
 
   // Fetch posts from API
   const fetchPosts = async (lastPostId: string | null) => {
@@ -589,6 +593,7 @@ export default function UserInfo() {
 
   useEffect(() => {
     // Fetch lần đầu khi component mount
+    setIsHoverAvatar(false);
     setPosts([]);
     hasMoreRef.current = true;
     loadedPostsRef.current = new Set();
@@ -606,7 +611,7 @@ export default function UserInfo() {
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [userId]);
+  }, [userId, isOpenChangeAvatar]);
 
   function handleFollowing() {
     var followingUserList: UserBasicModel[] = [];
@@ -653,16 +658,28 @@ export default function UserInfo() {
                     isLoaded={!isLoadingProfile}
                   >
                     {currentUser && (
-                      <>
-                        <Avatar
-                          className="w-36 h-36 text-large"
-                          name={currentUser.name}
-                          size="lg"
-                          src={currentUser.avatar || undefined}
-                        />
-                      </>
+                      <div
+                        className="relative w-36 h-36 rounded-full overflow-hidden" // Thêm overflow-hidden
+                        onMouseEnter={() => setIsHoverAvatar(true)}
+                        onMouseLeave={() => setIsHoverAvatar(false)}
+                      >
+                        {currentUser.avatar ? (
+                          <Image src={currentUser.avatar} alt={currentUser.name} />
+                        ) : (
+                          <div className="flex justify-center bg-zinc-600 items-center rounded-full w-36 h-36 text-2xl select-none">
+                            <span>{currentUser.name.substring(0, 3)}</span>
+                          </div>
+                        )}
+                        <AvatarChange isOpen={isOpenChangeAvatar} onOpenChange={onOpenChangeChangeAvatar}/>
+                        {isHoverAvatar && localStorage.id == userId && (
+                          <div className="absolute inset-0 flex items-center justify-center hover:cursor-pointer bg-black bg-opacity-50 rounded-full z-10" onMouseDownCapture={() => onOpenChangeAvatar()} >
+                            <CameraIcon className="text-white opacity-80 w-10 h-10" />
+                          </div>
+                        )}
+                      </div>
                     )}
                   </Skeleton>
+
                   <div className="flex flex-col gap-2">
                     <Skeleton isLoaded={!isLoadingProfile} className="w-4/5 rounded-lg">
                       <div className="text-2xl">{currentUser && currentUser.name}</div>

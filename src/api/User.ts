@@ -345,3 +345,34 @@ export const RESETPASSWORD: ApiCall<
     };
   }
 };
+
+export const UPDATEAVATAR: ApiCall<
+  { avatarReq: FormData; token: string },
+  {
+    data: { id: string; avatar: string; updateAt: Date };
+  }
+> = async (body) => {
+  const res = await fetch(API_URL + `users/update-user-avartar`, {
+    method: "PUT",
+    headers: {
+      "Authorization": "Bearer " + body.token,
+    },
+    body: body.avatarReq,
+  });
+
+  try {
+    const data = await res.json();
+
+    return {
+      isSuccess: res.ok,
+      res: res.ok ? data : null,
+      statusCode: res.status,
+    };
+  } catch (error) {
+    return {
+      isSuccess: false,
+      res: null,
+      statusCode: 500, // Lỗi mạng
+    };
+  }
+}
