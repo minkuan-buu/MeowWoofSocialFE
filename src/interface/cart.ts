@@ -12,3 +12,10 @@ export interface UserCart {
     status: string
   }[]
 }
+
+export interface InitialCartOrder {
+  cartId: string;
+  productItemId: string;
+  unitPrice: number;
+  quantity: number;
+}

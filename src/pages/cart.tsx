@@ -1,7 +1,8 @@
 import { GETUSERCART } from "@/api/Cart";
+import { CREATEORDER } from "@/api/Order";
 import Logout from "@/components/logout";
 import { title } from "@/components/primitives";
-import { UserCart } from "@/interface/cart";
+import { InitialCartOrder, UserCart } from "@/interface/cart";
 import { CreateOrderReq } from "@/interface/order";
 import CartLayout from "@/layouts/cartLayout";
 import { Button, Card, CardBody, CardHeader, Checkbox } from "@nextui-org/react";
@@ -13,13 +14,15 @@ import { RiShoppingBag4Fill } from "react-icons/ri";
 
 export default function CartPage() {
   const [cart, setCart] = useState<UserCart[]>([]);
-  const [productCartRequest, setProductCartRequest] = useState<CreateOrderReq[]>([]);
+  const [productCartRequest, setProductCartRequest] = useState<InitialCartOrder[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [quantities, setQuantities] = useState<Record<string, number>>({}); // Quản lý số lượng sản phẩm theo `cartId`.
   const [selectAll, setSelectAll] = useState(false);
   const [selectedStores, setSelectedStores] = useState<Record<string, boolean>>({});
   const [selectedItems, setSelectedItems] = useState<Record<string, boolean>>({});
   const [totalPrice, setTotalPrice] = useState(0);
+  const [productCartReqSelected, setProductCartReqSelected] = useState<CreateOrderReq[]>([]);
+  const [onLoading, setOnLoading] = useState(false);
 
   useEffect(() => {
     const handleGetCart = async () => {
@@ -30,17 +33,19 @@ export default function CartPage() {
         }
 
         const result = await GETUSERCART({ token: localStorage.token });
+
         if (result.isSuccess && result.res) {
           const cartData = result.res;
           setCart(cartData);
 
           // Chuẩn bị `productCartRequest` và `quantities`:
-          const initialRequests: CreateOrderReq[] = [];
+          const initialRequests: InitialCartOrder[] = [];
           const initialQuantities: Record<string, number> = {};
 
           cartData.forEach((store) => {
             store.cartItems.forEach((item) => {
               initialRequests.push({
+                cartId: item.cartId,
                 productItemId: item.productItemId,
                 quantity: item.quantity,
                 unitPrice: item.unitPrice,
@@ -81,13 +86,42 @@ export default function CartPage() {
 
   useEffect(() => {
     let total = 0;
+
     cart.forEach((store) =>
       store.cartItems.forEach((item) => {
         if (selectedItems[item.cartId]) {
           total += item.unitPrice * quantities[item.cartId];
+          var itemCart = productCartRequest.find(x => x.cartId === item.cartId);
+
+          if (itemCart) {
+            setProductCartReqSelected((prev) => {
+              // Kiểm tra nếu sản phẩm đã tồn tại trong danh sách
+              const exists = prev.some(
+                (item) => item.productItemId === itemCart?.productItemId
+              );
+          
+              // Nếu đã tồn tại, không cần thêm
+              if (exists) return prev;
+          
+              // Nếu chưa tồn tại, thêm vào danh sách
+              return [
+                ...prev,
+                {
+                  unitPrice: item.unitPrice,
+                  productItemId: itemCart?.productItemId || "",
+                  quantity: quantities[item.cartId],
+                },
+              ];
+            });
+          }
+          
+          // Kiểm tra log sau khi cập nhật
+          console.log(productCartReqSelected);
+          
         }
       })
     );
+
     setTotalPrice(total);
   }, [selectedItems, quantities]);
 
@@ -165,6 +199,30 @@ export default function CartPage() {
       return updatedSelectedItems;
     });
   };
+
+  const BuyButton = async () => {
+    if (onLoading) return;
+    setOnLoading(true);
+    // Gọi API tạo đơn hàng
+    try {
+      const result = await CREATEORDER({
+        product: productCartReqSelected,
+        token: localStorage.token,
+      });
+
+      if (result.isSuccess && result.res != null) {
+        window.location.href = `/checkout/${result.res.data.id}`;
+      } else {
+        if (result.statusCode === 401) {
+          Logout();
+        }
+      }
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setOnLoading(false);
+    }
+  }
   
 
   useEffect(() => {
@@ -207,6 +265,7 @@ export default function CartPage() {
         {/* Nút đặt hàng */}
         <Button
           size="lg"
+          onClick={BuyButton}
           className="bg-white text-[#ed5c02] hover:text-[#FFF] hover:bg-[#ed5c02] hover:border-[#FFF] text-xl font-bold"
           isDisabled={!Object.values(selectedItems).includes(true)} // Disable nếu không có checkbox nào được chọn
         >
