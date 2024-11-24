@@ -11,6 +11,7 @@ import ProductDetail from "./pages/productDetail";
 import Checkout from "./pages/checkout";
 import Transaction from "./pages/transactionPage";
 import RecoveryPage from "./pages/recovery";
+import Cart from "./pages/cart";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
       <Route element={<ProductDetail />} path="/stores/product/:productId" />
       <Route element={<Checkout />} path="/checkout/:orderId" />
       <Route element={<Transaction />} path="/payment" />
+      <Route element={<Cart />} path="/cart" />
       <Route element={<RecoveryPage />} path="/recovery" />
       <Route element={<TransactionNotifications />} path="/test" />
     </Routes>
