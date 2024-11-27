@@ -5,7 +5,7 @@ import { Product } from "@/interface/store";
 import NonFooterLayout from "@/layouts/non-footer";
 import { BreadcrumbItem, Breadcrumbs } from "@nextui-org/react";
 import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import { FiXCircle } from "react-icons/fi";
 import { ThreeDot } from "react-loading-indicators";
 import { useParams } from "react-router-dom";
@@ -84,6 +84,7 @@ export default function ProductDetail() {
 
   return (
     <NonFooterLayout>
+      <Toaster position="bottom-left" reverseOrder={false} />
       <div className="flex justify-center pt-5 pb-20">
         <div className="flex flex-col gap-4 h-full">
           {isLoadingProduct ? (

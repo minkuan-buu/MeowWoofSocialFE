@@ -1,9 +1,10 @@
+import { InitialCartOrder } from "@/interface/cart";
 import { API_URL } from "./Endpoint";
 
-import { CreateOrderReq, OrderDetail } from "@/interface/order";
+import { CreateOrderReq, OrderDetail, OrderPaymentDetail } from "@/interface/order";
 
 export const CREATEORDER: ApiCall<
-  { product: CreateOrderReq[]; token: string },
+  { product: InitialCartOrder[] | CreateOrderReq[]; token: string },
   { data: { id: string } }
 > = async (body) => {
   const res = await fetch(API_URL + `order/`, {
@@ -35,7 +36,7 @@ export const CREATEORDER: ApiCall<
 
 export const GETORDER: ApiCall<
   { orderId: string; token: string },
-  { data: OrderDetail }
+  { data: OrderDetail , message: string}
 > = async (body) => {
   const res = await fetch(API_URL + `order/${body.orderId}`, {
     method: "GET",
@@ -50,7 +51,7 @@ export const GETORDER: ApiCall<
 
     return {
       isSuccess: res.ok, // Kiểm tra trạng thái 2xx
-      res: res.ok ? data : null, // Chỉ trả về dữ liệu nếu thành công
+      res: res.ok || data ? data : null, // Chỉ trả về dữ liệu nếu thành công
       statusCode: res.status, // Mã trạng thái HTTP
     };
   } catch (error) {
@@ -63,16 +64,47 @@ export const GETORDER: ApiCall<
   }
 };
 
-export const CHECKREF: ApiCall<
-  { refId: string; token: string },
-  { data: {id: string} } | { message: string }
+export const GETLISTORDER: ApiCall<
+  { token: string },
+  { data: OrderDetail[], message: string }
 > = async (body) => {
-  const res = await fetch(API_URL + `order/check/${body.refId}`, {
+  const res = await fetch(API_URL + `order`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
       "Authorization": "Bearer " + body.token,
     },
+  });
+
+  try {
+    const data = await res.json();
+
+    return {
+      isSuccess: res.ok, // Kiểm tra trạng thái 2xx
+      res: res.ok || data ? data : null, // Chỉ trả về dữ liệu nếu thành công
+      statusCode: res.status, // Mã trạng thái HTTP
+    };
+  } catch (error) {
+    // Lỗi khi không thể parse JSON hoặc lỗi mạng
+    return {
+      isSuccess: false,
+      res: null,
+      statusCode: res.status,
+    };
+  }
+};
+
+export const CHECKTRANSACTION: ApiCall<
+  { id: string; token: string },
+  { data: OrderPaymentDetail }
+> = async (body) => {
+  const res = await fetch(API_URL + `transaction/handle-check`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + body.token,
+    },
+    body: JSON.stringify(body.id),
   });
 
   try {
@@ -92,32 +124,23 @@ export const CHECKREF: ApiCall<
   }
 };
 
-export const CANCELTRANSACTION: ApiCall<
-  { transactionId: string; token: string },
-  { data: OrderDetail } | { message: string }
-> = async (body) => {
-  const res = await fetch(API_URL + `transaction/cancel`, {
+export const MAKEPAYMENT = async (orderId: string, token: string) => {
+  const res = await fetch(API_URL + `payment`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": "Bearer " + body.token,
+      "Authorization": "Bearer " + token,
     },
-    body: JSON.stringify(body.transactionId),
+    body: JSON.stringify(orderId),
   });
 
-  try {
+  if (res.ok) {
     const data = await res.json();
-
-    return {
-      isSuccess: res.ok,
-      res: res.ok ? data : null,
-      statusCode: res.status,
-    };
-  } catch (error) {
-    return {
-      isSuccess: false,
-      res: null,
-      statusCode: 500, // Lỗi mạng
-    };
+    // Chuyển hướng tới URL thanh toán
+    if (data.redirectUrl) {
+      window.location.href = data.redirectUrl;
+    }
+  } else {
+    console.error("Payment failed.");
   }
 };

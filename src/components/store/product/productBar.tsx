@@ -1,3 +1,4 @@
+import { ADDTOCART } from "@/api/Cart";
 import { CREATEORDER } from "@/api/Order";
 import Logout from "@/components/logout";
 import { CreateOrderReq } from "@/interface/order";
@@ -6,6 +7,7 @@ import { Button } from "@nextui-org/button";
 import { Card, CardBody, Input } from "@nextui-org/react";
 import { RadioGroup, useRadio, VisuallyHidden, RadioProps, cn } from "@nextui-org/react";
 import { useState } from "react";
+import toast from "react-hot-toast";
 import { FaCartPlus } from "react-icons/fa";
 
 interface ProductBarProps {
@@ -47,6 +49,7 @@ export const ProductBar: React.FC<ProductBarProps> = ({ product }) =>  {
     product.petStoreProductItems[0].id,
   );
   const [onLoading, setOnLoading] = useState<boolean>(false);
+  const [onAddToCart, setOnAddToCart] = useState<boolean>(false);
   const [quantity, setQuantity] = useState<number>(1);
 
   function handleIncrease() {
@@ -56,6 +59,30 @@ export const ProductBar: React.FC<ProductBarProps> = ({ product }) =>  {
   function handleDecrease() {
     if (quantity > 1) {
       setQuantity(quantity - 1);
+    }
+  }
+
+  const AddToCart = async () => {
+    if(onAddToCart) return;
+    setOnAddToCart(true);
+    
+    try {
+      const result = await ADDTOCART({
+        token: localStorage.token,
+        productItemId: selected,
+        quantity: quantity,
+      });
+      if (result.isSuccess && result.res != null) {
+        toast.success("Đã thêm vào giỏ hàng");
+      } else {
+        if (result.statusCode === 401) {
+          Logout();
+        }
+      }
+    } catch (e) {
+      toast.error("Lỗi không xác định");
+    } finally {
+      setOnAddToCart(false);
     }
   }
 
@@ -174,6 +201,8 @@ export const ProductBar: React.FC<ProductBarProps> = ({ product }) =>  {
             </div>
             <div className="flex items-center mt-auto">
               <Button
+                isLoading={onAddToCart}
+                onClick={() => AddToCart()}
                 className="border-[#ed5c02]"
                 variant="bordered"
                 size="lg"
@@ -185,7 +214,7 @@ export const ProductBar: React.FC<ProductBarProps> = ({ product }) =>  {
                 className="ml-4 bg-[#ed5c02]"
                 isLoading={onLoading}
                 size="lg"
-                onPointerDown={() => BuyInstant()} // Gọi hàm ở đây
+                onClick={() => BuyInstant()} // Gọi hàm ở đây
               >
                 Mua ngay
               </Button>

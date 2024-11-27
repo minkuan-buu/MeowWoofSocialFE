@@ -29,6 +29,8 @@ import {
 import { Logo } from "@/components/icons";
 import { Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger } from "@nextui-org/react";
 import Logout from "./logout";
+import { FaShoppingCart } from "react-icons/fa";
+import { CiCircleList } from "react-icons/ci";
 
 export const Navbar = () => {
   const searchInput = (
@@ -120,6 +122,15 @@ export const Navbar = () => {
           <ThemeSwitch />
         </NavbarItem>
         <NavbarItem className="hidden lg:flex">{searchInput}</NavbarItem>
+        <NavbarItem className="hidden lg:flex">
+          <Button
+            as={Link}
+            className="!w-10 !h-10 !min-w-0 !p-0 bg-transparent hover:bg-neutral-500 !rounded-full transition-all duration-300 flex items-center justify-center"
+            href="/cart"
+          >
+            <FaShoppingCart />
+          </Button>
+        </NavbarItem>
         <NavbarItem className="hidden md:flex">
         {localStorage.getItem("token") == null ? (
           <Button
@@ -152,9 +163,18 @@ export const Navbar = () => {
                 aria-label="Dropdown menu with icons"
                 variant="bordered"
               >
-                <DropdownSection aria-label="Profile & Actions" showDivider>
+                <DropdownSection aria-label="Profile & Actions">
                   <DropdownItem key="info" startContent={<UserIcon />} href={`/user/${localStorage.getItem("id")}`}>
                     Thông tin cá nhân
+                  </DropdownItem>
+                </DropdownSection>
+                <DropdownSection aria-label="Profile & Actions" showDivider>
+                  <DropdownItem
+                    key="info"
+                    startContent={<CiCircleList className="text-xl mr-1" />}
+                    href={`/orders`}
+                  >
+                    Đơn hàng
                   </DropdownItem>
                 </DropdownSection>
                 <DropdownItem

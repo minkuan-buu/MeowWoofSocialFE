@@ -9,9 +9,11 @@ import Store from "./pages/stores";
 import TransactionNotifications from "./pages/test";
 import ProductDetail from "./pages/productDetail";
 import Checkout from "./pages/checkout";
-import Transaction from "./pages/transactionPage";
 import RecoveryPage from "./pages/recovery";
 import Cart from "./pages/cart";
+import PaymentStatus from "./pages/paymentStatus";
+import NotFound404 from "./pages/error/404";
+import Order from "./pages/order";
 
 function App() {
   return (
@@ -24,10 +26,12 @@ function App() {
       <Route element={<Store />} path="/stores" />
       <Route element={<ProductDetail />} path="/stores/product/:productId" />
       <Route element={<Checkout />} path="/checkout/:orderId" />
-      <Route element={<Transaction />} path="/payment" />
+      <Route element={<PaymentStatus />} path="/payment" />
       <Route element={<Cart />} path="/cart" />
       <Route element={<RecoveryPage />} path="/recovery" />
       <Route element={<TransactionNotifications />} path="/test" />
+      <Route element={<NotFound404 />} path="/not-found" />
+      <Route element={<Order />} path="/orders" />
     </Routes>
   );
 }

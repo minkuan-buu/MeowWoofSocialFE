@@ -1,4 +1,4 @@
-import { GETUSERCART } from "@/api/Cart";
+import { DELETECART, GETUSERCART, UPDATECART } from "@/api/Cart";
 import { CREATEORDER } from "@/api/Order";
 import Logout from "@/components/logout";
 import { title } from "@/components/primitives";
@@ -9,7 +9,8 @@ import { Button, Card, CardBody, CardHeader, Checkbox } from "@nextui-org/react"
 import { set } from "date-fns";
 import { fi } from "date-fns/locale";
 import { useEffect, useState } from "react";
-import { Toaster } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
+import { FaTrash } from "react-icons/fa";
 import { RiShoppingBag4Fill } from "react-icons/ri";
 
 export default function CartPage() {
@@ -21,10 +22,14 @@ export default function CartPage() {
   const [selectedStores, setSelectedStores] = useState<Record<string, boolean>>({});
   const [selectedItems, setSelectedItems] = useState<Record<string, boolean>>({});
   const [totalPrice, setTotalPrice] = useState(0);
-  const [productCartReqSelected, setProductCartReqSelected] = useState<CreateOrderReq[]>([]);
+  const [productCartReqSelected, setProductCartReqSelected] = useState<InitialCartOrder[]>([]);
   const [onLoading, setOnLoading] = useState(false);
+  const [onLoadingUpdate, setOnLoadingUpdate] = useState(false);
+  const [onLoadingDelete, setOnLoadingDelete] = useState(false);
+  const [LoadRequest, setLoadRequest] = useState(true);
 
   useEffect(() => {
+    if (isLoading || !LoadRequest) return;
     const handleGetCart = async () => {
       setIsLoading(true);
       try {
@@ -35,7 +40,7 @@ export default function CartPage() {
         const result = await GETUSERCART({ token: localStorage.token });
 
         if (result.isSuccess && result.res) {
-          const cartData = result.res;
+          const cartData = result.res.data;
           setCart(cartData);
 
           // Chuẩn bị `productCartRequest` và `quantities`:
@@ -62,27 +67,99 @@ export default function CartPage() {
       } catch (error) {
         console.error(error);
       } finally {
+        setLoadRequest(false);
         setIsLoading(false);
       }
     };
 
     handleGetCart();
-  }, []);
+  }, [isLoading, LoadRequest]);
 
-  const handleDecrease = (cartId: string) => {
-    setQuantities((prev) => {
-      const updated = { ...prev };
-      if (updated[cartId] > 1) updated[cartId] -= 1;
-      return updated;
-    });
+  const handleDecrease = async (cartId: string, productItemId: string) => {
+    if(onLoadingUpdate) return;
+    setOnLoadingUpdate(true);
+    try {
+      const result = await UPDATECART({
+        token: localStorage.token,
+        productItemId: productItemId,
+        quantity: quantities[cartId] - 1,
+      });
+      console.log(result);
+
+      if (result.isSuccess && result.res) {
+        setQuantities((prev) => {
+          const updated = { ...prev };
+
+          if (updated[cartId] > 1) updated[cartId] -= 1;
+
+          return updated;
+        });
+        toast.success("Đã cập nhật giỏ hàng");
+      } else if (result.statusCode === 401) {
+        window.location.href = "/login";
+      }
+    } catch (error) {
+      toast.error("Có lỗi xảy ra");
+    } finally {
+      setOnLoadingUpdate(false);
+    }
   };
 
-  const handleIncrease = (cartId: string) => {
-    setQuantities((prev) => ({
-      ...prev,
-      [cartId]: prev[cartId] + 1,
-    }));
+  const handleIncrease = async (cartId: string, productItemId: string) => {
+    if(onLoadingUpdate) return;
+    setOnLoadingUpdate(true);
+    try {
+      const result = await UPDATECART({
+        token: localStorage.token,
+        productItemId: productItemId,
+        quantity: quantities[cartId] + 1,
+      });
+      console.log(result);
+
+      if (result.isSuccess && result.res) {
+        setQuantities((prev) => ({
+          ...prev,
+          [cartId]: prev[cartId] + 1,
+        }));
+        toast.success("Đã cập nhật giỏ hàng");
+      } else if (result.statusCode === 401) {
+        window.location.href = "/login";
+      }
+    } catch (error) {
+      toast.error("Có lỗi xảy ra");
+    } finally {
+      setOnLoadingUpdate(false);
+    }
   };
+
+  const handleDelete = async (cartId: string) => {
+    if(onLoadingDelete) return;
+    setOnLoadingDelete(true);
+    try {
+      const result = await DELETECART({
+        token: localStorage.token,
+        id: cartId,
+      });
+      console.log(result);
+
+      if (result.isSuccess && result.res) {
+        setQuantities((prev) => {
+          const updated = { ...prev };
+          delete updated[cartId];
+          return updated;
+        });
+        toast.success("Đã xóa sản phẩm khỏi giỏ hàng");
+      } else if (result.statusCode === 401) {
+        window.location.href = "/login";
+      }
+    } catch (error) {
+      toast.error("Có lỗi xảy ra");
+    } finally {
+      setOnLoadingDelete(false);
+      setLoadRequest(true);
+    }
+  }
+
 
   useEffect(() => {
     let total = 0;
@@ -99,14 +176,15 @@ export default function CartPage() {
               const exists = prev.some(
                 (item) => item.productItemId === itemCart?.productItemId
               );
-          
+
               // Nếu đã tồn tại, không cần thêm
               if (exists) return prev;
-          
+
               // Nếu chưa tồn tại, thêm vào danh sách
               return [
                 ...prev,
                 {
+                  cartId: item.cartId,
                   unitPrice: item.unitPrice,
                   productItemId: itemCart?.productItemId || "",
                   quantity: quantities[item.cartId],
@@ -114,10 +192,6 @@ export default function CartPage() {
               ];
             });
           }
-          
-          // Kiểm tra log sau khi cập nhật
-          console.log(productCartReqSelected);
-          
         }
       })
     );
@@ -285,7 +359,7 @@ export default function CartPage() {
             <div className="flex flex-col gap-4 min-w-[1420px] h-full">
               <h1 className="text-4xl text-[#102530] font-bold">Giỏ hàng</h1>
               <Card>
-                <CardBody className="grid grid-cols-[auto_1fr_200px_210px_110px] items-center gap-4 p-4">
+                <CardBody className="grid grid-cols-[auto_1fr_200px_210px_110px_100px] items-center gap-4 p-4">
                   <div className="flex justify-center items-center">
                     <Checkbox
                       isSelected={selectAll}
@@ -296,6 +370,7 @@ export default function CartPage() {
                   <p>Đơn giá</p>
                   <p>Số lượng</p>
                   <p>Thành tiền</p>
+                  <p>Thao tác</p>
                 </CardBody>
               </Card>
               {isLoading ? (
@@ -321,7 +396,7 @@ export default function CartPage() {
                           const totalPrice = cartItem.unitPrice * quantity;
 
                           return (
-                            <div key={cartItem.cartId} className="grid grid-cols-[auto_1fr_185px_280px_100px] items-center mb-4">
+                            <div key={cartItem.cartId} className="grid grid-cols-[auto_1fr_180px_280px_120px_100px] items-center mb-4">
                               <Checkbox
                                 className="mr-3"
                                 isSelected={selected}
@@ -349,24 +424,35 @@ export default function CartPage() {
                               <div className="flex items-center">
                                 <Button
                                   className="!w-12 !h-10 !min-w-0 !p-0 !rounded-full flex items-center justify-center"
-                                  onClick={() => handleDecrease(cartItem.cartId)}
+                                  isDisabled={onLoadingUpdate || quantity <= 1}
+                                  onClick={() => handleDecrease(cartItem.cartId, cartItem.productItemId)}
                                 >
                                   -
                                 </Button>
                                 <input
-                                  value={quantity}
                                   readOnly
                                   className="w-12 text-center"
+                                  value={quantity}
                                 />
                                 <Button
                                   className="!w-12 !h-10 !min-w-0 !p-0 !rounded-full flex items-center justify-center"
-                                  onClick={() => handleIncrease(cartItem.cartId)}
+                                  isDisabled={onLoadingUpdate}
+                                  onClick={() => handleIncrease(cartItem.cartId, cartItem.productItemId)}
                                 >
                                   +
                                 </Button>
                               </div>
 
                               <p>₫{totalPrice.toLocaleString().replace(/,/g, ".")}</p>
+                              <div className="flex justify-end pr-14">
+                                <Button
+                                  className="!w-10 !h-10 !min-w-0 !p-0 bg-transparent hover:bg-gray-400 !rounded-full transition-all duration-300 flex items-center justify-center"
+                                  isDisabled={onLoadingDelete}
+                                  onClick={() => handleDelete(cartItem.cartId)}
+                                >
+                                  <FaTrash />
+                                </Button>
+                              </div>
                             </div>
                           );
                         })}

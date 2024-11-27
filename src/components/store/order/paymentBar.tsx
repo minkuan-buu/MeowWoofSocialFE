@@ -1,3 +1,4 @@
+import { MAKEPAYMENT } from "@/api/Order";
 import { OrderDetail } from "@/interface/order";
 import { Button } from "@nextui-org/button";
 import { Link } from "@nextui-org/link";
@@ -11,6 +12,12 @@ interface PaymentBarProps {
 }
 
 export const PaymentBar: React.FC<PaymentBarProps> = ({ order }) =>  {
+  const [onLoading, setOnLoading] = React.useState<boolean>(false);
+  const handlePayment = async () => {
+    setOnLoading(true);
+    await MAKEPAYMENT(order.id, localStorage.token);
+  };
+
   return (
     <Card className="p-7">
       <CardHeader className="text-xl">
@@ -60,8 +67,15 @@ export const PaymentBar: React.FC<PaymentBarProps> = ({ order }) =>  {
             </div>
           </div>
         </div>
-        <div className="flex flex-row justify-end items-center">
-          <Button className="mt-5 p-7 text-xl bg-[#ed5c02]" isDisabled={order.userAddress == null} as={Link} href={`/payment?orderId=${order.id}&refId=${order.refId}&amount=${order.totalPrice}`}>Đặt hàng</Button>
+        <div className="flex flex-row justify-end items-center gap-4">
+          {/* <Button className="mt-5 p-7 text-xl bg-[#ed5c02]" isDisabled={order.userAddress == null} as={Link} href={`/payment?orderId=${order.id}&refId=${order.refId}&amount=${order.totalPrice}`}>Đặt hàng</Button> */}
+          {order.userAddress == null && (
+            <span className="text-red-500 text-md">
+              <i>(Vui lòng cập nhật địa chỉ giao hàng)</i>
+            </span>
+          )}
+
+          <Button className="mt-5 p-7 text-xl bg-[#ed5c02]" isDisabled={order.userAddress == null} isLoading={onLoading} onClick={handlePayment}>Đặt hàng</Button>
         </div>
       </CardBody>
     </Card>
