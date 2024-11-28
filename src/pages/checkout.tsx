@@ -6,7 +6,7 @@ import { PaymentBar } from "@/components/store/order/paymentBar";
 import { OrderDetail } from "@/interface/order";
 import NonFooterLayout from "@/layouts/non-footer";
 import { useEffect, useState } from "react";
-import { Toaster } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import { useParams } from "react-router-dom";
 
 export default function Checkout() {
@@ -27,15 +27,16 @@ export default function Checkout() {
       if (result.isSuccess && result.res != null) {
         setOrder(result.res.data);
       } else {
-        console.log(1)
         if (result.statusCode === 401) {
           Logout();
-        } else if(result.statusCode === 400 && result.res?.message.includes("not found")) {
+        } else if(result.statusCode === 400 && result.res?.message && result.res?.message.includes("not found")) {
           window.location.href = "/not-found";
+        } else {
+          throw new Error("Lỗi không xác định");
         }
       }
-    } catch (e) {
-      console.log(e);
+    } catch (e: any) {
+      window.location.href = "/not-found";
     }
   }
 

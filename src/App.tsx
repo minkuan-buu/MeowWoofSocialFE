@@ -14,6 +14,7 @@ import Cart from "./pages/cart";
 import PaymentStatus from "./pages/paymentStatus";
 import NotFound404 from "./pages/error/404";
 import Order from "./pages/order";
+import OrderDetailPage from "./pages/orderDetail";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
       <Route element={<TransactionNotifications />} path="/test" />
       <Route element={<NotFound404 />} path="/not-found" />
       <Route element={<Order />} path="/orders" />
+      <Route element={<OrderDetailPage />} path="/order/:orderId" />
     </Routes>
   );
 }

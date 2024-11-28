@@ -1,40 +1,17 @@
-import { ADDTOCART } from "@/api/Cart";
-import { CREATEORDER } from "@/api/Order";
-import Logout from "@/components/logout";
-import { CreateOrderReq, OrderDetail } from "@/interface/order";
-import { Product } from "@/interface/store";
-import { Button } from "@nextui-org/button";
+import { OrderDetail } from "@/interface/order";
 import { Card, CardBody, CardHeader, Divider, Input } from "@nextui-org/react";
-import { RadioGroup, useRadio, VisuallyHidden, RadioProps, cn } from "@nextui-org/react";
 import React from "react";
-import { useState } from "react";
-import toast from "react-hot-toast";
-import { FaCartPlus } from "react-icons/fa";
 import { MdOutlineStorefront } from "react-icons/md";
 import { RiShoppingBag4Fill, RiTruckLine } from "react-icons/ri";
 
-interface productOrderTrackingBarProps {
+interface ProductOrderDetailTrackingBarProps {
   order: OrderDetail; 
 }
-export const ProductOrderTrackingBar: React.FC<productOrderTrackingBarProps> = ({ order }) =>  {
+
+export const ProductOrderDetailTrackingBar : React.FC<ProductOrderDetailTrackingBarProps> = ({ order }) =>  {
   return (
     <Card className="pl-7 pt-9 pb-2">
-      <CardHeader className="flex items-center justify-between">
-        <div className="flex flex-row pr-8 gap-2 select-none hover:cursor-pointer" onMouseDownCapture={() => window.location.href = `/order/${order.id}`}>
-          MÃ ĐƠN HÀNG. {order.id}
-        </div>
-        <div className="flex flex-row items-center pr-8 gap-2">
-          <RiTruckLine />
-          <span className="text-md">
-            {order.status == "Delivering"
-              ? "Đang vận chuyển"
-              : order.status == "Cancelled"
-                ? "Đã hủy"
-                : "Giao hàng thành công"}
-          </span>
-        </div>
-      </CardHeader>
-      <CardBody className="flex text-lg flex-col gap-4 hover:cursor-pointer" onMouseDownCapture={() => window.location.href = `/order/${order.id}`}>
+      <CardBody className="flex text-lg flex-col gap-4">
         <table className="table-auto w-full items-center">
           <thead>
             <tr>
@@ -78,7 +55,7 @@ export const ProductOrderTrackingBar: React.FC<productOrderTrackingBarProps> = (
                         </div>
                       </div>
                     </td>
-                    <td className={`py-3 text-[15px] ${index === 0 && "pt-12"} pr-8 flex justify-end`}>₫{itemProduct.unitPrice.toLocaleString().replace(/,/g, '.')}</td>
+                    <td className={`py-3 text-[17px] ${index === 0 && "pt-12"} pr-8 flex justify-end`}>₫{itemProduct.unitPrice.toLocaleString().replace(/,/g, '.')}</td>
                   </tr>
                 ))}
               </React.Fragment>
@@ -89,10 +66,27 @@ export const ProductOrderTrackingBar: React.FC<productOrderTrackingBarProps> = (
         <div className="flex justify-end gap-4 pr-8">
           <div className="flex flex-col gap-4">
             <div className="flex flex-row justify-between gap-44">
-              <span className="text-xl">Thành tiền:</span>
+              <span className="text-md">Tiền hàng:</span>
+              <div className="flex flex-row items-center gap-1">
+                <span className="text-md">₫</span>
+                <span className="text-md">
+                  {order.totalPrice.toLocaleString().replace(/,/g, '.')}
+                </span>
+              </div>
+            </div>
+            <div className="flex flex-row justify-between gap-44">
+              <span className="text-md">Phí vận chuyển:</span>
               <div>
-                <span className="text-lg text-[#ed5c02]">₫</span>
-                <span className="text-2xl text-[#ed5c02]">
+                <span className="text-md]">
+                  Miễn phí
+                </span>
+              </div>
+            </div>
+            <div className="flex flex-row justify-between gap-44">
+              <span className="text-md">Thành tiền:</span>
+              <div className="flex flex-row items-center gap-1">
+                <span className="text-xl text-[#ed5c02]">₫</span>
+                <span className="text-3xl text-[#ed5c02]">
                   {order.totalPrice.toLocaleString().replace(/,/g, '.')}
                 </span>
               </div>
