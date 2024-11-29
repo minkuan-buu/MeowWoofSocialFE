@@ -56,3 +56,15 @@ export interface OrderPaymentDetail {
   statusPayment: string;
   status: string;
 }
+
+export interface OrderRating {
+  id: string;
+  name: string;
+  phone: string;
+  orderDetails: {
+    productItemId: string;
+    attachment: string;
+    productName: string;
+    productItemName: string;
+  }[]
+}

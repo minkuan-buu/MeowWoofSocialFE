@@ -9,9 +9,12 @@ import { RadioGroup, useRadio, VisuallyHidden, RadioProps, cn } from "@nextui-or
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { FaCartPlus } from "react-icons/fa";
+import { TiStarFullOutline, TiStarHalfOutline, TiStarOutline } from "react-icons/ti";
 
 interface ProductBarProps {
-  product: Product; 
+  product: Product;
+  avgRating: number;
+  countRating: number;
 }
 
 export const CustomRadio = (props: RadioProps) => {
@@ -44,13 +47,44 @@ export const CustomRadio = (props: RadioProps) => {
   );
 };
 
-export const ProductBar: React.FC<ProductBarProps> = ({ product }) =>  {
+export const ProductBar: React.FC<ProductBarProps> = ({ product, avgRating, countRating }) =>  {
   const [selected, setSelected] = useState<string>(
     product.petStoreProductItems[0].id,
   );
   const [onLoading, setOnLoading] = useState<boolean>(false);
   const [onAddToCart, setOnAddToCart] = useState<boolean>(false);
   const [quantity, setQuantity] = useState<number>(1);
+
+  const renderStars = (stars: number) => {
+    const fullStars = Math.floor(stars); // Sao đầy
+    const hasHalfStar = stars - fullStars > 0 && stars - fullStars <= 0.6; // Sao nửa
+    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0); // Sao rỗng
+
+    return (
+      <div className="flex">
+        {/* Sao đầy */}
+        {[...Array(fullStars)].map((_, index) => (
+          <TiStarFullOutline
+            key={`full-${index}`}
+            className="text-md text-yellow-500"
+          />
+        ))}
+
+        {/* Sao nửa */}
+        {hasHalfStar && (
+          <TiStarHalfOutline className="text-md text-yellow-500" />
+        )}
+
+        {/* Sao rỗng */}
+        {[...Array(emptyStars)].map((_, index) => (
+          <TiStarOutline
+            key={`empty-${index}`}
+            className="text-md text-gray-400"
+          />
+        ))}
+      </div>
+    );
+  };
 
   function handleIncrease() {
     setQuantity(quantity + 1);
@@ -139,11 +173,20 @@ export const ProductBar: React.FC<ProductBarProps> = ({ product }) =>  {
             <div>
               <h1 className="text-2xl line-clamp-2">{product.name}</h1>
               <div className="flex flex-row w-full items-center mt-2">
-                <h2 className="text-sm">Chưa có đánh giá</h2>
+                {avgRating > 0 && countRating > 0 ? (
+                  <>
+                    <div className="flex items-center">
+                      <span className="text-[17px] pr-1"><u>{avgRating.toFixed(1)}</u></span>
+                      <span>{renderStars(avgRating)}</span>
+                    </div>
+                  </>
+                ) : (
+                  <h2 className="text-sm">Chưa có đánh giá</h2>
+                )}
                 <hr className="vertical-hr bg-gray-500" />
-                <h2 className="text-sm">Đánh giá</h2>
+                <div className="text-sm"><span className="text-[17px] pr-1"><u>{countRating}</u></span> Đánh giá</div>
                 <hr className="vertical-hr bg-gray-500" />
-                <h2 className="text-sm">Lượt bán</h2>
+                <h2 className="text-sm"><span className="text-[17px] pr-1"><u>{product.totalSales}</u></span> Lượt bán</h2>
               </div>
               <div className="text-lg mt-5">
                 <span>₫</span>
@@ -170,7 +213,7 @@ export const ProductBar: React.FC<ProductBarProps> = ({ product }) =>  {
             <div>
               {/* Thêm nút số lượng ở đây */}
               <div className="flex flex-row items-center mt-5">
-                <h2 className="text-default text-[#a1a1aa]">Số lượng</h2>
+                <h2 className="text-sm opacity-60">Số lượng</h2>
                 <div className="flex flex-row items-center ml-5">
                   <Button
                     className="!w-12 !h-10 !min-w-0 !p-0 !rounded-full flex items-center justify-center"

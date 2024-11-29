@@ -1,4 +1,4 @@
-import { Button, Card, CardBody, CardHeader, Divider } from '@nextui-org/react';
+import { Button, Card, CardBody, CardHeader, Divider, useDisclosure } from '@nextui-org/react';
 import { Stepper, Step } from 'react-form-stepper';
 import { RiArrowLeftSLine } from 'react-icons/ri';
 //import "../../../styles/stepper.css"
@@ -6,11 +6,13 @@ import { FaShippingFast } from 'react-icons/fa';
 import { FaBoxOpen } from "react-icons/fa6";
 import { TbInvoice } from 'react-icons/tb';
 import { OrderDetail } from '@/interface/order';
+import { RatingProduct } from '../product/ratingProduct';
 
 interface OrderStepperProp {
     order: OrderDetail;
 }
 export const OrderStepper: React.FC<OrderStepperProp> = ({ order }) => {
+  const {isOpen: isRatingOpen, onOpen: onRatingOpen, onOpenChange: onRatingOpenChange} = useDisclosure();
   return(
     <Card>
       <CardHeader className='flex flex-row justify-between items-center p-6'>
@@ -69,7 +71,8 @@ export const OrderStepper: React.FC<OrderStepperProp> = ({ order }) => {
             </Stepper>
             <Divider />
             <div className="flex justify-end p-6">
-              <Button size='lg' isDisabled={order.status != "Success"} className="bg-[#ed5c02]">Đánh giá ngay</Button>
+              <RatingProduct isOpen={isRatingOpen} onOpenChange={onRatingOpenChange} />
+              <Button size='lg' isDisabled={order.status != "Success"} onClick={onRatingOpen} className="bg-[#ed5c02]">Đánh giá</Button>
             </div>
           </>
         )}

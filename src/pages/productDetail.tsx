@@ -1,6 +1,9 @@
+import { GETPRODUCTRATING } from "@/api/Rating";
 import { GETPRODUCTDETAIL } from "@/api/Store";
 import Logout from "@/components/logout";
 import { ProductBar } from "@/components/store/product/productBar";
+import { ProductRatingBar } from "@/components/store/product/ProductRatingBar";
+import { ProductRating } from "@/interface/rating";
 import { Product } from "@/interface/store";
 import NonFooterLayout from "@/layouts/non-footer";
 import { BreadcrumbItem, Breadcrumbs } from "@nextui-org/react";
@@ -13,7 +16,10 @@ import { useParams } from "react-router-dom";
 export default function ProductDetail() {
   const { productId } = useParams<{ productId: string }>();
   const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
+  const [avgRating, setAvgRating] = useState<number>(0);
+  const [rating, setRating] = useState<ProductRating[]>([]);
   const [isLoadingProduct, setIsLoadingProduct] = useState<boolean>(false);
+  const [isLoadingRating, setIsLoadingRating] = useState<boolean>(false);
 
   const fetchProduct = async () => {
     if (isLoadingProduct || !localStorage.token) return; // Tránh nhiều yêu cầu cùng lúc
@@ -76,10 +82,45 @@ export default function ProductDetail() {
     }
   };
 
+  const fetchProductRating = async () => {
+    if (isLoadingRating || !localStorage.token) return; // Tránh nhiều yêu cầu cùng lúc
+    setIsLoadingRating(true);
+    if (productId == null) {
+      window.location.href = "/";
+      return;
+    }
+    try {
+      const result = await GETPRODUCTRATING({
+        id: productId,
+        token: localStorage.token,
+      });
+  
+      if(result.isSuccess && result.res != null) {
+        setRating(result.res.data);
+        const avgRating = result.res.data?.length
+          ? result.res.data.reduce((acc, cur) => acc + cur.rating, 0) /
+            result.res.data.length
+          : 0;
+
+        setAvgRating(avgRating);
+
+      } else {
+        if(result.statusCode === 401) {
+          Logout();
+        } else {
+          throw new Error("Lỗi không xác định");
+        }
+      }
+    } catch (error) {
+      
+    }
+  }
+
   useEffect(() => {
     // Fetch lần đầu khi component mount
     setIsLoadingProduct(true);
     fetchProduct();
+    fetchProductRating();
   }, [productId]);
 
   return (
@@ -105,7 +146,8 @@ export default function ProductDetail() {
                   <BreadcrumbItem>{currentProduct?.name}</BreadcrumbItem>
                 </Breadcrumbs>
               </div>
-              {currentProduct && <ProductBar product={currentProduct} />}
+              {currentProduct && <ProductBar product={currentProduct} avgRating={avgRating} countRating={rating.length}/>}
+              {rating && <ProductRatingBar rating={rating} avgRating={avgRating}/>}
             </>
           )}
         </div>

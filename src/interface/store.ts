@@ -12,6 +12,7 @@ export interface ListProduct {
 export interface Product {
   id: string;
   name: string;
+  totalSales: number;
   author: {
     id: string;
     name: string;
