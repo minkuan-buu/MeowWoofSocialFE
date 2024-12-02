@@ -31,8 +31,24 @@ import { Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger 
 import Logout from "./logout";
 import { FaShoppingCart } from "react-icons/fa";
 import { CiCircleList } from "react-icons/ci";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 export const Navbar = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate(); // If using React Router, else use window.location.href
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && searchTerm.trim() !== "") {
+      // Navigate to stores page with keyword query
+      navigate(`/stores?keyword=${encodeURIComponent(searchTerm)}`);
+    }
+  };
+
   const searchInput = (
     <Input
       aria-label="Search"
@@ -51,6 +67,9 @@ export const Navbar = () => {
         <SearchIcon className="text-base text-default-400 pointer-events-none flex-shrink-0" />
       }
       type="search"
+      value={searchTerm}
+      onChange={handleSearchChange}
+      onKeyDown={handleKeyDown} // Listen for Enter key press
     />
   );
 

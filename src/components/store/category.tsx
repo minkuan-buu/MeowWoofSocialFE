@@ -1,19 +1,29 @@
 import { Card, CardBody, CardHeader } from "@nextui-org/react";
+import { useEffect, useState } from "react";
+import { Category } from "@/interface/category";
+import { GETCATEGORIES } from "@/api/Category";
 
-const categories = [
-  {
-    name: "Thức ăn cho chó",
-    link: "/stores/food",
-    imageSrc: "/food.png",
-  },
-  {
-    name: "Thực phẩm",
-    link: "/stores/food",
-    imageSrc: "/food.png",
-  },
-];
+export function CategoryBar() {
+  const [categories, setCategories] = useState<Category[]>([]);
 
-export function Category() {
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const result = await GETCATEGORIES({
+        token: localStorage.getItem("token") || "",
+      });
+
+      if (result.isSuccess && result.res != null) {
+        var getData = result.res.data;
+
+        getData.forEach((item) => {
+          item.link = `/stores?category=${item.id}`;
+        });
+        setCategories(getData);
+      }
+    }
+    fetchCategories();
+  },[]);
+
   return (
     <Card className="">
       <CardHeader>
@@ -25,7 +35,7 @@ export function Category() {
             <div key={index} className="flex flex-col items-center">
               <a href={category.link} className="flex flex-col items-center">
                 <img
-                  src={category.imageSrc}
+                  src={category.attachment}
                   width={70}
                   height={70}
                   alt={category.name}

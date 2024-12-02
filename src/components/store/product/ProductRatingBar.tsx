@@ -56,7 +56,7 @@ export const ProductRatingBar: React.FC<ProductRatingProps> = ({ rating, avgRati
   }
 
   return (
-    <Card className="relative max-w-[1225px] w-full max-h-[475px] h-auto rounded-xl p-4">
+    <Card className="relative max-w-[1225px] w-full h-auto rounded-xl p-4">
       <CardHeader className="flex justify-between">
         <h2 className="text-2xl font-semibold">Đánh giá sản phẩm {rating.length > 0 && `(${rating.length})`}</h2>
         {rating.length > 0 ? (

@@ -2,11 +2,11 @@ import { ListProduct, Product } from "@/interface/store";
 import { API_URL } from "./Endpoint";
 
 export const GETALLPRODUCTS: ApiCall<
-  { PageSize: number; lastPetStoreProductId: string; token: string },
+  { PageSize: number; lastPetStoreProductId: string; category: string; subCategory: string; keyword: string; token: string },
   { data: ListProduct[] }
 > = async (body) => {
   const res = await fetch(
-    API_URL + `stores/products?PageSize=${body.PageSize}&lastPetStoreProductId=${body.lastPetStoreProductId}`,
+    API_URL + `stores/products?PageSize=${body.PageSize}&lastPetStoreProductId=${body.lastPetStoreProductId}${body.category ? `&category=${body.category}` : ""}${body.subCategory ? `&subCategory=${body.subCategory}` : ""}${body.keyword ? `&keyword=${body.keyword}` : ""}`,
     {
       method: "GET",
       headers: {

@@ -22,6 +22,9 @@ export function TopProductTrending() {
       const result = await GETALLPRODUCTS({
         PageSize: pageSize,
         lastPetStoreProductId: lastPetStoreProductId || "",
+        category: "", // Áp dụng bộ lọc danh mục
+        subCategory: "", // Áp dụng bộ lọc danh mục con
+        keyword: "", // Áp dụng bộ lọc từ khóa
         token: localStorage.token,
       });
 
