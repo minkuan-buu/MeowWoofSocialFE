@@ -1,0 +1,14 @@
+.banner-image {
+    width: 250px; /* Kích thước của banner */
+    height: auto; /* Đảm bảo tỷ lệ chiều cao của ảnh đúng */
+  }
+  
+  .flex {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .flex-1 {
+    flex: 1; /* Phần này chiếm toàn bộ không gian còn lại */
+  }
+  

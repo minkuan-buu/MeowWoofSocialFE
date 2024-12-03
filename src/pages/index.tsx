@@ -939,109 +939,74 @@ export default function IndexPage() {
         </DefaultLayout>
       ) : (
         <NonFooterLayout>
-          <Toaster
-            position="bottom-left"
-            reverseOrder={false}
-          />
-          <CreatePost
-            isOpen={isOpenCreatePost}
-            onOpenChange={onOpenChangeCreatePost}
-            setPosts={setPosts}
-          />
-          <ShareModal isOpen={isOpenShare} onOpenChange={onOpenChangeShare} postId={sharePostId}/>
-          {/* <section className="flex-1 bg-[#e5dfca]"> */}
-          <div className="flex justify-center pt-5 pb-20">
-            <div className="flex flex-col gap-4 w-[600px] h-full">
-              <Card className="py-2">
-                <CardBody>
-                  <div className="flex items-center justify-center">
-                    <Avatar
-                      className="avatar-size select-none" // Thêm class cho Avatar
-                      name={
-                        localStorage.getItem("avatar")
-                          ? undefined
-                          : localStorage.getItem("name") || undefined
-                      }
-                      src={localStorage.getItem("avatar") || undefined}
-                    />
-                    <Button
-                      className="status-bar select-none"
-                      onPress={onOpenCreatePost}
-                      style={{ backgroundColor: "#e5dfca" }}
-                    >
-                      <span className="status-icon">😊</span>
-                      <span className="status-text">
-                        {localStorage.getItem("name")} ơi, bạn đang nghĩ gì thế?
-                      </span>
-                    </Button>
-                  </div>
-                </CardBody>
-              </Card>
-              {posts.map((post: Post, index: number) => (
-                <PostCard key={post.id} post={post} emojiPost={emojiPost} setEmojiPost={setEmojiPost} setPosts={setPosts}/>
-              ))}
-              {isLoading ? (
-                <div className="flex justify-center">
-                  <ThreeDot color="#102530" size="medium" text="" textColor="" />
-                </div>
-              ) : null}
-              {!hasMoreRef.current ? (
-                <div className="flex justify-center text-[#102530]">
-                  Không còn nội dung nào
-                </div>
-              ) : null}
-              {/* <Card>
-                <CardBody>
-                  <div className="flex flex-col gap-4">
-                    <div className="flex justify-between">
-                      <div className="flex items-start justify-start">
-                        <Avatar
-                          className="avatar-size"  // Thêm class cho Avatar
-                          name={
-                            localStorage.getItem("avatar")
-                              ? undefined
-                              : localStorage.getItem("name") || undefined
-                          }
-                          src={localStorage.getItem("avatar") || undefined}
-                        />
-                        <div className="flex flex-col">
-                          <span className="ml-2">Name</span>
-                          <span className="ml-2 text-xs text-gray-400">
-                            CreatedAt
-                          </span>
-                        </div>
-                      </div>
-                      <TbDotsVertical />
-                    </div>
-                    <div className="">Nội dung ở đây</div>
-                    <img src="dog-cat-sit.jpg" alt="" />
-                    <hr />
-                    <div className="flex flex-row w-full">
-                      <div className="flex flex-row items-center px-12">
-                        <AiOutlineLike />
-                        <span className="ml-2 select-none">Thích</span>
-                      </div>
-                      <hr />
-                      <hr className="vertical-hr bg-gray-50" />
-                      <div className="flex flex-row items-center px-12">
-                        <FaRegCommentAlt />
-                        <span className="ml-2 select-none">Bình luận</span>
-                      </div>
-                      <hr />
-                      <hr className="vertical-hr bg-gray-50" />
-                      <div className="flex flex-row items-center px-12">
-                        <FaShareSquare />
-                        <span className="ml-2 select-none">Chia sẻ</span>
-                      </div>
-                      <hr />
-                    </div>
-                  </div>
-                </CardBody>
-              </Card> */}
+  <Toaster position="bottom-left" reverseOrder={false} />
+  <div className="relative">
+    {/* Banner trái */}
+    <div className="absolute left-20 top-1/2 transform -translate-y-1/2 z-10">
+      <img src="./banner1.png" alt="banner1" />
+    </div>
+
+    {/* Nội dung chính ở giữa */}
+    <CreatePost
+      isOpen={isOpenCreatePost}
+      onOpenChange={onOpenChangeCreatePost}
+      setPosts={setPosts}
+    />
+    <ShareModal isOpen={isOpenShare} onOpenChange={onOpenChangeShare} postId={sharePostId} />
+    
+    <div className="flex justify-center pt-5 pb-20">
+      <div className="flex flex-col gap-4 w-[600px] h-full">
+        <Card className="py-2">
+          <CardBody>
+            <div className="flex items-center justify-center">
+              <Avatar
+                className="avatar-size select-none"
+                name={
+                  localStorage.getItem("avatar")
+                    ? undefined
+                    : localStorage.getItem("name") || undefined
+                }
+                src={localStorage.getItem("avatar") || undefined}
+              />
+              <Button
+                className="status-bar select-none"
+                onPress={onOpenCreatePost}
+                style={{ backgroundColor: "#e5dfca" }}
+              >
+                <span className="status-icon">😊</span>
+                <span className="status-text">
+                  {localStorage.getItem("name")} ơi, bạn đang nghĩ gì thế?
+                </span>
+              </Button>
             </div>
+          </CardBody>
+        </Card>
+
+        {posts.map((post: Post, index: number) => (
+          <PostCard key={post.id} post={post} emojiPost={emojiPost} setEmojiPost={setEmojiPost} setPosts={setPosts} />
+        ))}
+        
+        {isLoading ? (
+          <div className="flex justify-center">
+            <ThreeDot color="#102530" size="medium" text="" textColor="" />
           </div>
-          {/* </section> */}
-        </NonFooterLayout>
+        ) : null}
+        
+        {!hasMoreRef.current ? (
+          <div className="flex justify-center text-[#102530]">
+            Không còn nội dung nào
+          </div>
+        ) : null}
+      </div>
+    </div>
+
+    {/* Banner phải */}
+    <div className="absolute right-20 top-1/2 transform -translate-y-1/2 z-10">
+      <img src="./banner2.png" alt="banner2" />
+    </div>
+  </div>
+</NonFooterLayout>
+
       )}
     </>
   );
